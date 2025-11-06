@@ -15,7 +15,7 @@
                     </a>
                 </li>
                 <li class="has-submenu">
-                    <a href="/employee">
+                    <a href="/user">
                         <i class="icon-accelerator"></i>
                         Nhân viên
                     </a>
