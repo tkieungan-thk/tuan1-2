@@ -78,7 +78,8 @@
 
                                     <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
                                         <!-- item-->
-                                        <a class="dropdown-item" href="#"><i class="mdi mdi-account-circle"></i>
+                                        <a class="dropdown-item" href="{{ route('password.edit') }}"><i
+                                                class="mdi mdi-account-circle"></i>
                                             Profile</a>
                                         <div class="dropdown-divider"></div>
                                         <form method="POST" action="{{ route('logout') }}">
@@ -115,23 +116,6 @@
         </header>
     </div>
     <div class="wrapper">
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert" id="alert-success">
-                {{ session('success') }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" id="alert-error">
-                {{ session('error') }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        @endif
         @yield('content');
     </div>
 
@@ -142,22 +126,3 @@
 </body>
 
 </html>
-
-<script>
-    setTimeout(function() {
-        let successAlert = document.getElementById('alert-success');
-        let errorAlert = document.getElementById('alert-error');
-
-        if (successAlert) {
-            successAlert.classList.remove('show');
-            successAlert.classList.add('fade');
-            successAlert.style.display = 'none';
-        }
-
-        if (errorAlert) {
-            errorAlert.classList.remove('show');
-            errorAlert.classList.add('fade');
-            errorAlert.style.display = 'none';
-        }
-    }, 5000);
-</script>

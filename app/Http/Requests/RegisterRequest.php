@@ -11,11 +11,16 @@ class RegisterRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @property string $name
+     * @property string $email
+     * @property string $password
+     * @property string $password_confirmation
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

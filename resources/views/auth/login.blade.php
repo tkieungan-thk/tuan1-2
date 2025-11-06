@@ -56,7 +56,7 @@
 
         <div class="form-group row m-t-30 m-b-0">
             <div class="col-sm-7">
-                <a href="" class="text-muted">
+                <a href="{{ route('password.form') }}" class="text-muted">
                     <i class="fa fa-lock m-r-5"></i> Forgot your password?
                 </a>
             </div>
