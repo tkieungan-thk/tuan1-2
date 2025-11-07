@@ -11,6 +11,11 @@ Route::get('/admin', function () {
     return view('layouts.app');
 });
 
-Route::get('/user', [UserController::class, 'index'])->name('users.index');
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-Route::post('/users', [UserController::class, 'store'])->name('users.store');
+Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+Route::post('/users/update/{id}', [UserController::class, 'update'])->name('users.update');
+Route::patch('/users/status/{id}', [UserController::class, 'updateStatus'])
+    ->name('users.updateStatus');
+Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');

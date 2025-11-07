@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserCreatedMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -53,6 +55,8 @@ class UserController extends Controller
                 'status' => true,
             ]);
 
+            // Mail::to($user->email)->send(new UserCreatedMail($user));
+
             return redirect()
                 ->route('users.index')
                 ->with('success', __('messages.user_created'));
@@ -76,7 +80,9 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        return view('users.edit-user', compact('user'));
     }
 
     /**
@@ -90,8 +96,25 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+
+    public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Người dùng đã được xóa thành công.');
+    }
+
+    public function updateStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->status = ! $user->status;
+        $user->save();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Cập nhật trạng thái người dùng thành công!');
     }
 }

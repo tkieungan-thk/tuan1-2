@@ -177,6 +177,7 @@
     @include('layouts.partials.footer')
 
     @include('layouts.partials.script')
+    @yield('scripts')
 
 </body>
 
