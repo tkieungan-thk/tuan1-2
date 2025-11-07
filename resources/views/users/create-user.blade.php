@@ -5,12 +5,12 @@
         <div class="page-title-box">
             <div class="row align-items-center">
                 <div class="col-sm-6">
-                    <h4 class="page-title">Thêm người dùng</h4>
+                    <h4 class="page-title">{{ __('users.page_title') }}</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="{{ route('users.index') }}">Nhân sự</a></li>
-                        <li class="breadcrumb-item active">Thêm</li>
+                        <li class="breadcrumb-item"><a href="{{ route('users.index') }}">{{ __('users.item1') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('users.item_create') }}</li>
                     </ol>
                 </div>
             </div>

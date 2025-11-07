@@ -7,47 +7,43 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\CreateUserRequest;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Hiển thị danh sách người dùng
+     * 
+     * @return View.
      */
-    public function index()
+    public function index(): View
     {
-        $users = User::all();
+        //$users = User::all();
+        $users = User::orderBy('id', 'desc')->paginate(10);
 
         return view('users.index', compact('users'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Hiển thị form tạo người dùng mới
+     * 
+     * @return View
      */
-    public function create()
+    public function create(): View
     {
         return view('users.create-user');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Xử lý tạo người dùng mới
+     * 
+     * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(CreateUserRequest $request): RedirectResponse
     {
         try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|min:6|confirmed',
-            ], [
-                'name.required' => __('messages.name_required'),
-                'email.required' => __('messages.email_required'),
-                'email.email' => __('messages.email_invalid'),
-                'email.unique' => __('messages.email_unique'),
-                'password.required' => __('messages.password_required'),
-                'password.min' => __('messages.password_min'),
-                'password.confirmed' => __('messages.password_confirmed'),
-            ]);
-
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -55,7 +51,7 @@ class UserController extends Controller
                 'status' => true,
             ]);
 
-            // Mail::to($user->email)->send(new UserCreatedMail($user));
+            //Mail::to($user->email)->send(new UserCreatedMail($user));
 
             return redirect()
                 ->route('users.index')
@@ -68,25 +64,18 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Hiển thị form chỉnh sửa người dùng
+     * 
+     * @return View
      */
-    public function show(string $id)
+    public function edit(User $user): View
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $user = User::findOrFail($id);
-
         return view('users.edit-user', compact('user'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Xử lý cập nhật thông tin người dùng
+     * 
      */
     public function update(Request $request, string $id)
     {
@@ -94,12 +83,13 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Xử lý xóa người dùng
+     * 
+     * @return RedirectResponse
      */
 
-    public function destroy($id)
+    public function destroy(User $user): RedirectResponse
     {
-        $user = User::findOrFail($id);
         $user->delete();
 
         return redirect()
@@ -107,9 +97,13 @@ class UserController extends Controller
             ->with('success', 'Người dùng đã được xóa thành công.');
     }
 
-    public function updateStatus($id)
+    /*
+     * Xử lý thay đổi trạng thái người dùng, khóa tài khoản
+     * 
+     * @return RedirectResponse
+     */
+    public function updateStatus(User $user): RedirectResponse
     {
-        $user = User::findOrFail($id);
         $user->status = ! $user->status;
         $user->save();
 

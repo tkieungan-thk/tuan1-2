@@ -5,12 +5,12 @@
         <div class="page-title-box">
             <div class="row align-items-center">
                 <div class="col-sm-6">
-                    <h4 class="page-title">Nhân sự</h4>
+                    <h4 class="page-title">{{ __('users.page_title') }}</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="javascript:void(0);">Nhân sự</a></li>
-                        <li class="breadcrumb-item"><a href="javascript:void(0);">Danh sách</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('users.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('users.item2') }}</a></li>
                     </ol>
                 </div>
             </div>
@@ -47,10 +47,10 @@
                                 <thead class="thead-default">
                                     <tr>
                                         <th>#</th>
-                                        <th>Name</th>
+                                        <th>{{ __('users.username') }}</th>
                                         <th>Email</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('users.status') }}</th>
+                                        <th>{{ __('users.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -84,11 +84,13 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="d-flex justify-content-end">
+                            {{ $users->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-hidden="true">
