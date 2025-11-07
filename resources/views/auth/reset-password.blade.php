@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
-@section('title', 'Register')
-@section('page-title', 'Reset Password')
+@section('title', __('auth.reset_password'))
+@section('page-title', __('auth.reset_password'))
 
 @section('content')
     <form class="form-horizontal m-t-30" method="POST" action="{{ route('password.update') }}">
@@ -13,7 +13,7 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="email">{{ __('Email') }}</label>
+                <label for="email">{{ __('auth.email') }}</label>
                 <input id="email" type="email" name="email"
                     class="form-control @error('email') is-invalid @enderror" placeholder="Enter your email"
                     value="{{ old('email', $email) }}" required autofocus>
@@ -25,10 +25,10 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="password">{{ __('New Password') }}</label>
+                <label for="password">{{ __('auth.new_password') }}</label>
                 <input id="password" type="password" name="password"
-                    class="form-control @error('password') is-invalid @enderror" placeholder="Enter new password" required
-                    autocomplete="new-password">
+                    class="form-control @error('password') is-invalid @enderror"
+                    placeholder="{{ __('auth.enter_new_password') }}" required autocomplete="new-password">
                 @error('password')
                     <span class="invalid-feedback d-block">{{ $message }}</span>
                 @enderror
@@ -37,10 +37,10 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="password_confirmation">{{ __('Confirm Password') }}</label>
+                <label for="password_confirmation">{{ __('auth.confirm_new_password') }}</label>
                 <input id="password_confirmation" type="password" name="password_confirmation"
                     class="form-control @error('password_confirmation') is-invalid @enderror"
-                    placeholder="Confirm new password" required autocomplete="new-password">
+                    placeholder="{{ __('auth.reenter_new_password') }}" required autocomplete="new-password">
                 @error('password_confirmation')
                     <span class="invalid-feedback d-block">{{ $message }}</span>
                 @enderror
@@ -50,14 +50,14 @@
         <div class="form-group text-center m-t-20">
             <div class="col-12">
                 <button class="btn btn-primary btn-block btn-lg waves-effect waves-light" type="submit">
-                    {{ __('Reset Password') }}
+                    {{ __('auth.reset_password_button') }}
                 </button>
             </div>
         </div>
 
         <div class="form-group mb-0 row">
             <div class="col-12 m-t-10 text-center">
-                <a href="{{ route('login') }}" class="text-muted">Back to Login</a>
+                <a href="{{ route('login') }}" class="text-muted">{{ __('auth.back_to_login') }}</a>
             </div>
         </div>
     </form>

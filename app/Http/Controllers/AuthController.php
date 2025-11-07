@@ -1,17 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function showLoginForm()
+    /**
+     * Hiển thị form đăng nhập.
+     * Nếu người dùng đã đăng nhập, sẽ được chuyển hướng đến trang admin.
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showLoginForm(): RedirectResponse|View
     {
         if (Auth::check()) {
             return redirect()->route('admin');
@@ -19,10 +29,15 @@ class AuthController extends Controller
 
         return view('auth.login');
     }
+
     /**
-     * @param  \Illuminate\Http\Request  $request
-     */
-    public function login(LoginRequest $request)
+     * Xử lý yêu cầu đăng nhập người dùng.
+     * Xác thực thông tin đăng nhập và đăng nhập người dùng nếu thành công.
+     * 
+     * @param \App\Http\Requests\LoginRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+    */
+    public function login(LoginRequest $request): RedirectResponse
     {
         $credentials = $request->only('email', 'password');
 
@@ -37,15 +52,24 @@ class AuthController extends Controller
             ->with('error', __('messages.login_failed'));
     }
 
-    public function showRegisterForm()
+    /**
+     * Hiển thị form đăng ký tài khoản mới.
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function showRegisterForm(): View
     {
         return view('auth.register');
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * Xử lý yêu cầu đăng ký tài khoản mới.
+     * Tạo người dùng mới, mã hóa mật khẩu và tự động đăng nhập sau khi đăng ký thành công.
+     * 
+     * @param \App\Http\Requests\RegisterRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): RedirectResponse
     {
         try {
             $user = User::create([
@@ -62,7 +86,14 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
+    /**
+     * Xử lý yêu cầu đăng xuất người dùng.
+     * Hủy phiên đăng nhập hiện tại và chuyển hướng đến trang đăng nhập.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
 

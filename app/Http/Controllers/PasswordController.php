@@ -13,33 +13,36 @@ use Illuminate\View\View;
 
 class PasswordController extends Controller
 {
+    /**
+     * Hiển thị view update passwords
+     * 
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Contracts\View\View
+     */
     public function edit(Request $request): View
     {
-        return view('profile.update-password', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+
+        return view('profile.update-password', compact('user'));
     }
-    public function update(Request $request): RedirectResponse
+
+    /**
+     * Xử lý update mật khẩu sau khi kiểm tra mật khẩu hiện tại, mật khẩu mới
+     * 
+     * @param  \App\Http\Requests\UpdatePasswordRequest  $request
+     * @return RedirectResponse
+     */
+    public function update(UpdatePasswordRequest $request): RedirectResponse
     {
         try {
-            $validated = $request->validateWithBag('updatePassword', [
-                'current_password' => ['required', 'current_password'],
-                'password' => ['required', Password::defaults(), 'confirmed'],
-            ]);
-
             $user = $request->user();
 
-            $user->update([
-                'password' => Hash::make($validated['password']),
-            ]);
+            $user->update(['password'=> Hash::make($request->password)]);
 
             return back()->with('success', __('passwords.updated'));
 
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors(), 'updatePassword');
         } catch (\Throwable $e) {
             return back()->with('error', __('passwords.error'));
         }
     }
-    
 }

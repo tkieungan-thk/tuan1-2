@@ -9,4 +9,5 @@ return [
     'updated' => 'Your password has been updated successfully!',
     'current_invalid' => 'Your current password is incorrect.',
     'error' => 'An unexpected error occurred. Please try again later.',
+    
 ];

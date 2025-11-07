@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
-@section('title', 'Register')
-@section('page-title', 'Register')
+@section('title', __('auth.register'))
+@section('page-title', __('auth.register'))
 
 @section('content')
     @if (session('success'))
@@ -26,9 +26,9 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="name">Username</label>
+                <label for="name">{{ __('auth.username') }}</label>
                 <input id="name" class="form-control" type="text" name="name" value="{{ old('name') }}"
-                    required autofocus placeholder="Enter your username">
+                    required autofocus placeholder="{{ __('auth.enter_usename') }}">
                 @error('name')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -37,9 +37,9 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="email">Email</label>
+                <label for="email">{{ __('auth.email') }}</label>
                 <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}"
-                    required placeholder="Enter your email">
+                    required placeholder="{{ __('auth.enter_email') }}">
                 @error('email')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -48,9 +48,9 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="password">Password</label>
+                <label for="password">{{ __('auth.password') }}</label>
                 <input id="password" class="form-control" type="password" name="password" required
-                    placeholder="Enter your password">
+                    placeholder="{{ __('auth.enter_password') }}">
                 @error('password')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -59,9 +59,9 @@
 
         <div class="form-group">
             <div class="col-12">
-                <label for="password_confirmation">Confirm Password</label>
+                <label for="password_confirmation">{{ __('auth.confirm_password') }}</label>
                 <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" required
-                    placeholder="Re-enter your password">
+                    placeholder="{{ __('auth.reenter_password') }}">
                 @error('password_confirmation')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -73,8 +73,8 @@
                 <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="customCheck1">
                     <label class="custom-control-label font-weight-normal" for="customCheck1">
-                        I accept <a href="#" class="text-primary">Terms and Conditions</a>
-                    </label>
+                        {{ __('auth.accept_terms') }} <a href="#"
+                            class="text-primary">{{ __('auth.terms_conditions') }}</a> </label>
                 </div>
             </div>
         </div>
@@ -82,14 +82,14 @@
         <div class="form-group text-center m-t-20">
             <div class="col-12">
                 <button class="btn btn-primary btn-block btn-lg waves-effect waves-light" type="submit">
-                    Register
+                    {{ __('auth.register_button') }}
                 </button>
             </div>
         </div>
 
         <div class="form-group mb-0 row">
             <div class="col-12 m-t-10 text-center">
-                <a href="{{ route('login') }}" class="text-muted">Already have an account?</a>
+                <a href="{{ route('login') }}" class="text-muted">{{ __('auth.already_have_account') }}</a>
             </div>
         </div>
     </form>
