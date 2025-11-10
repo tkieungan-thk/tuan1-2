@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Mail\UserCreatedMail;
+use App\Mail\UserPasswordUpdatedMail;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -46,8 +46,6 @@ class UserController extends Controller
                 'status' => true,
             ]);
 
-            // Mail::to($user->email)->send(new UserCreatedMail($user));
-
             return redirect()
                 ->route('users.index')
                 ->with('success', __('messages.user_created'));
@@ -75,6 +73,7 @@ class UserController extends Controller
             $validated = $request->validated();
 
             $dirty = false;
+            $passwordChanged = false;
 
             if ($user->name !== $validated['name']) {
                 $user->name = $validated['name'];
@@ -89,10 +88,16 @@ class UserController extends Controller
             if (! empty($validated['password'])) {
                 $user->password = Hash::make($validated['password']);
                 $dirty = true;
+                $passwordChanged = true;
             }
 
             if ($dirty) {
                 $user->save();
+                if ($passwordChanged) {
+                    Mail::to($user->email)->send(
+                        new UserPasswordUpdatedMail($user, $validated['password'])
+                    );
+                }
             }
 
             return redirect()
@@ -138,6 +143,6 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'Cập nhật trạng thái người dùng thành công!');
+            ->with('success', __('users.update_status'));
     }
 }

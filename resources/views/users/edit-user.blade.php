@@ -5,12 +5,12 @@
         <div class="page-title-box">
             <div class="row align-items-center">
                 <div class="col-sm-6">
-                    <h4 class="page-title">Chỉnh sửa người dùng</h4>
+                    <h4 class="page-title">{{ __('users.page_title') }}</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="{{ route('users.index') }}">Nhân sự</a></li>
-                        <li class="breadcrumb-item active">Chỉnh sửa</li>
+                        <li class="breadcrumb-item"><a href="{{ route('users.index') }}">{{ __('users.item1') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('users.item_update') }}</li>
                     </ol>
                 </div>
             </div>
@@ -22,7 +22,7 @@
                     @csrf
                     @method('PATCH')
                     <div class="form-group">
-                        <label for="name">Tên</label>
+                        <label for="name">{{ __('users.username') }}</label>
                         <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
                             class="form-control" required>
                         @error('name')
@@ -31,7 +31,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">{{ __('users.email') }}</label>
                         <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
                             class="form-control" required>
                         @error('email')
@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="password">Mật khẩu mới</label>
+                        <label for="password">{{ __('users.password') }}</label>
                         <input type="password" id="password" name="password" class="form-control" required>
                         @error('password')
                             <span class="text-danger small">{{ $message }}</span>
@@ -48,14 +48,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="password_confirmation">Nhập lại mật khẩu</label>
+                        <label for="password_confirmation">{{ __('users.confirm_password') }}</label>
                         <input type="password" id="password_confirmation" name="password_confirmation" class="form-control"
                             required>
                     </div>
 
                     <div class="form-group mt-4">
-                        <button type="submit" class="btn btn-primary">Lưu</button>
-                        <a href="{{ route('users.index') }}" class="btn btn-secondary">Hủy</a>
+                        <button type="submit" class="btn btn-primary">{{ __('users.btn_saved') }}</button>
+                        <a href="{{ route('users.index') }}" class="btn btn-secondary">{{ __('users.btn_cancel') }}</a>
                     </div>
                 </form>
             </div>

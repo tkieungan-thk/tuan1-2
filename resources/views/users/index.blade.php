@@ -104,7 +104,8 @@
                     <i id="statusModalIcon" class="fa fa-3x mb-3"></i>
                 </div>
                 <div class="modal-footer justify-content-center border-0 pb-4">
-                    <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-secondary px-4"
+                        data-dismiss="modal">{{ __('users.btn_cancel') }}</button>
                     <form id="statusModalForm" method="POST" style="display:inline;">
                         @csrf
                         @method('PATCH')
@@ -119,7 +120,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title mt-0">Xóa người dùng</h5>
+                    <h5 class="modal-title mt-0">{{ __('users.title_delete_user') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
@@ -129,11 +130,12 @@
                     <i class="fa fa-trash text-danger fa-3x mb-3"></i>
                 </div>
                 <div class="modal-footer justify-content-center border-0 pb-4">
-                    <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-secondary px-4"
+                        data-dismiss="modal">{{ __('users.btn_cancel') }}</button>
                     <form id="deleteModalForm" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger px-4">Xóa</button>
+                        <button type="submit" class="btn btn-danger px-4">{{ __('users.btn_deleted_user') }}</button>
                     </form>
                 </div>
             </div>
@@ -143,6 +145,16 @@
 
 @section('scripts')
     <script>
+        const translations = {
+            lockTitle: "{{ __('users.lock_title') }}",
+            unlockTitle: "{{ __('users.unlock_title') }}",
+            lockMessage: "{{ __('users.lock_message', ['name' => '__NAME__']) }}",
+            unlockMessage: "{{ __('users.unlock_message', ['name' => '__NAME__']) }}",
+            lockButton: "{{ __('users.lock_button') }}",
+            unlockButton: "{{ __('users.unlock_button') }}",
+            deleteMessage: "{!! __('users.delete_message', ['name' => '__NAME__']) !!}"
+        };
+
         $('#statusModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const id = button.data('id');
@@ -152,11 +164,9 @@
             const modal = $(this);
             const isActive = status == 1;
 
-            modal.find('#statusModalTitle').text(isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản');
-            modal.find('#statusModalMessage').text(
-                isActive ?
-                `Bạn có chắc chắn muốn KHÓA tài khoản của ${name} không?` :
-                `Bạn có chắc chắn muốn MỞ KHÓA tài khoản của ${name} không?`
+            modal.find('#statusModalTitle').text(isActive ? translations.lockTitle : translations.unlockTitle);
+            modal.find('#statusModalMessage').html(
+                (isActive ? translations.lockMessage : translations.unlockMessage).replace('__NAME__', name)
             );
 
             const header = modal.find('#statusModalHeader');
@@ -166,11 +176,11 @@
             if (isActive) {
                 header.removeClass().addClass('modal-header bg-warning text-dark');
                 icon.removeClass().addClass('fa fa-lock text-warning fa-3x mb-3');
-                buttonSubmit.removeClass().addClass('btn btn-warning px-4').text('Khóa');
+                buttonSubmit.removeClass().addClass('btn btn-warning px-4').text(translations.lockButton);
             } else {
                 header.removeClass().addClass('modal-header bg-success text-white');
                 icon.removeClass().addClass('fa fa-unlock text-success fa-3x mb-3');
-                buttonSubmit.removeClass().addClass('btn btn-success px-4').text('Mở khóa');
+                buttonSubmit.removeClass().addClass('btn btn-success px-4').text(translations.unlockButton);
             }
 
             modal.find('#statusModalForm').attr('action', `/users/${id}/status`);
@@ -183,7 +193,7 @@
 
             const modal = $(this);
             modal.find('#deleteModalMessage').html(
-                `Bạn có chắc chắn muốn <strong>xóa</strong> tài khoản của <strong>${name}</strong> không? Hành động này không thể hoàn tác.`
+                translations.deleteMessage.replace('__NAME__', name)
             );
 
             modal.find('#deleteModalForm').attr('action', `/users/${id}`);
