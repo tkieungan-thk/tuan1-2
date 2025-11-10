@@ -24,4 +24,11 @@ return [
     'password' => 'Mật khẩu',
     'confirm_password' => 'Nhâp lại mật khẩu',
     'btn_saved' => 'Lưu',
+    'search_name' => 'Tìm theo tên',
+    'search_email' => 'Tìm theo email',
+    'all_status' => 'Tất cả trạng thái',
+    'active' => 'Đang hoạt động',
+    'inactive' => 'Đã khóa',
+    'filter' => 'Lọc',
+    'reset' => 'Đặt lại',
 ];

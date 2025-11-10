@@ -37,11 +37,45 @@
             </div>
         @endif
 
-
         <div class="row">
             <div class="col-lg-12">
                 <div class="card m-b-30">
                     <div class="card-body">
+                        <div class="mb-3">
+                            <form action="{{ route('users.index') }}" method="GET" class="form-inline row g-2">
+                                <div class="col-md-3">
+                                    <input type="text" name="name" value="{{ request('name') }}" class="form-control"
+                                        placeholder="{{ __('users.search_name') }}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <input type="text" name="email" value="{{ request('email') }}" class="form-control"
+                                        placeholder="{{ __('users.search_email') }}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <select name="status" class="form-control">
+                                        <option value="">{{ __('users.all_status') }}</option>
+                                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
+                                            {{ __('users.active') }}
+                                        </option>
+                                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
+                                            {{ __('users.inactive') }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-search"></i> {{ __('users.filter') }}
+                                    </button>
+                                    <a href="{{ route('users.index') }}" class="btn btn-secondary">
+                                        <i class="fa fa-undo"></i> {{ __('users.reset') }}
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table mb-0">
                                 <thead class="thead-default">
@@ -63,16 +97,15 @@
                                             <td>
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('users.edit', $user->id) }}"
-                                                        class="btn btn-warning"><i class="fa fa-edit"></i></a>
+                                                        class="btn btn-warning mx-1"><i class="fa fa-edit"></i></a>
                                                     <button type="button"
-                                                        class="btn {{ $user->status ? 'btn-warning' : 'btn-success' }}"
+                                                        class="btn {{ $user->status ? 'btn-warning' : 'btn-success' }} mx-1"
                                                         data-toggle="modal" data-target="#statusModal"
                                                         data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                                                         data-status="{{ $user->status }}">
                                                         <i class="fa {{ $user->status ? 'fa-lock' : 'fa-unlock' }}"></i>
                                                     </button>
-
-                                                    <button type="button" class="btn btn-danger" data-toggle="modal"
+                                                    <button type="button" class="btn btn-danger mx-1" data-toggle="modal"
                                                         data-target="#deleteModal" data-id="{{ $user->id }}"
                                                         data-name="{{ $user->name }}">
                                                         <i class="fa fa-trash"></i>
@@ -85,6 +118,11 @@
                             </table>
                         </div>
                     </div>
+                    {{-- <div class="card-body">
+                        <div class="pagination justify-content-end">
+                            {{ $users->links() }}
+                        </div>
+                    </div> --}}
                 </div>
             </div>
         </div>
@@ -197,6 +235,28 @@
             );
 
             modal.find('#deleteModalForm').attr('action', `/users/${id}`);
+        });
+        $(document).ready(function() {
+            $('input[name="name"], input[name="email"], select[name="status"]').on('input change', function() {
+                let name = $('input[name="name"]').val();
+                let email = $('input[name="email"]').val();
+                let status = $('select[name="status"]').val();
+
+                $.ajax({
+                    url: "{{ route('users.index') }}",
+                    method: 'GET',
+                    data: {
+                        name,
+                        email,
+                        status
+                    },
+                    beforeSend: function() {
+                    },
+                    success: function(response) {
+                        $('tbody').html($(response).find('tbody').html());
+                    }
+                });
+            });
         });
     </script>
 @endsection

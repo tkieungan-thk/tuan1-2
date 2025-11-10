@@ -24,4 +24,11 @@ return [
     'password' => 'Password',
     'confirm_password' => 'Confirm Password',
     'btn_saved' => 'Save',
+    'search_name' => 'Search name',
+    'search_email' => 'Search email',
+    'all_status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'filter' => 'Filter',
+    'reset' => 'Reset',
 ];

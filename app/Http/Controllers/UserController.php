@@ -8,6 +8,7 @@ use App\Mail\UserPasswordUpdatedMail;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -18,9 +19,23 @@ class UserController extends Controller
      *
      * @return View.
      */
-    public function index(): View
+    public function index(Request $request)
     {
-        $users = User::orderBy('id', 'desc')->paginate(5);
+        $query = User::query();
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%'.$request->name.'%');
+        }
+
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%'.$request->email.'%');
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['0', '1'])) {
+            $query->where('status', $request->status);
+        }
+
+        $users = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
 
         return view('users.index', compact('users'));
     }
@@ -35,6 +50,8 @@ class UserController extends Controller
 
     /**
      * Lưu người dùng mới vào cơ sở dữ liệu.
+     *
+     * @return RedirectResponse .
      */
     public function store(CreateUserRequest $request): RedirectResponse
     {
@@ -58,6 +75,8 @@ class UserController extends Controller
 
     /**
      * Hiển thị form chỉnh sửa thông tin người dùng.
+     *
+     * @param User
      */
     public function edit(User $user): View
     {
@@ -66,6 +85,8 @@ class UserController extends Controller
 
     /**
      * Cập nhật thông tin người dùng.
+     *
+     * @param User
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
