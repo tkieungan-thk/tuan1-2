@@ -5,19 +5,19 @@
                 <li class="has-submenu">
                     <a href="/categories">
                         <i class="icon-accelerator"></i>
-                        Danh mục sản phẩm
+                        {{ __('layout.categories') }}
                     </a>
                 </li>
                 <li class="has-submenu">
                     <a href="/product">
                         <i class="icon-accelerator"></i>
-                        Sản phẩm
+                        {{ __('layout.products') }}
                     </a>
                 </li>
                 <li class="has-submenu">
                     <a href="/employee">
                         <i class="icon-accelerator"></i>
-                        Nhân viên
+                        {{ __('layout.users') }}
                     </a>
                 </li>
             </ul>

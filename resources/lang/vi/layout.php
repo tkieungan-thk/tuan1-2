@@ -1,0 +1,8 @@
+<?php
+
+return [
+    'title' => 'Admin Quản Trị',
+    'categories' => 'Danh mục sản phẩm',
+    'products' => 'Sản phẩm',
+    'users' => 'Người dùng',
+];
