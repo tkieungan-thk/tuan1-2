@@ -4,10 +4,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\ResetPasswordController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('layouts.auth');
+    if (Auth::check()) {
+        return redirect()->route('admin');
+    }
+
+    return redirect()->route('login');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

@@ -34,6 +34,7 @@ return [
     | Supported: "session"
     |
     */
+    'remember_token_length' => 60,
 
     'guards' => [
         'web' => [

@@ -28,7 +28,7 @@
             <div class="col-12">
                 <label for="name">{{ __('auth.username') }}</label>
                 <input id="name" class="form-control" type="text" name="name" value="{{ old('name') }}"
-                    required autofocus placeholder="{{ __('auth.enter_usename') }}">
+                    required autofocus placeholder="{{ __('auth.enter_username') }}">
                 @error('name')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -65,17 +65,6 @@
                 @error('password_confirmation')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-12">
-                <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="customCheck1">
-                    <label class="custom-control-label font-weight-normal" for="customCheck1">
-                        {{ __('auth.accept_terms') }} <a href="#"
-                            class="text-primary">{{ __('auth.terms_conditions') }}</a> </label>
-                </div>
             </div>
         </div>
 

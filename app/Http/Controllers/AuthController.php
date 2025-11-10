@@ -80,7 +80,7 @@ class AuthController extends Controller
 
             Auth::login($user);
 
-            return redirect('/admin')->with('success', __('messages.register_success'));
+            return redirect()->route('admin')->with('success', __('messages.register_success'));
         } catch (\Exception $e) {
             return back()->withInput()->with('error', __('messages.register_failed'));
         }
