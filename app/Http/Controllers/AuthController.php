@@ -33,10 +33,10 @@ class AuthController extends Controller
     /**
      * Xử lý yêu cầu đăng nhập người dùng.
      * Xác thực thông tin đăng nhập và đăng nhập người dùng nếu thành công.
-     * 
+     *
      * @param \App\Http\Requests\LoginRequest $request
      * @return \Illuminate\Http\RedirectResponse
-    */
+     */
     public function login(LoginRequest $request): RedirectResponse
     {
         $credentials = $request->only('email', 'password');
@@ -54,7 +54,7 @@ class AuthController extends Controller
 
     /**
      * Hiển thị form đăng ký tài khoản mới.
-     * 
+     *
      * @return \Illuminate\View\View
      */
     public function showRegisterForm(): View
@@ -65,7 +65,7 @@ class AuthController extends Controller
     /**
      * Xử lý yêu cầu đăng ký tài khoản mới.
      * Tạo người dùng mới, mã hóa mật khẩu và tự động đăng nhập sau khi đăng ký thành công.
-     * 
+     *
      * @param \App\Http\Requests\RegisterRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -73,8 +73,8 @@ class AuthController extends Controller
     {
         try {
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
+                'name'     => $request->name,
+                'email'    => $request->email,
                 'password' => Hash::make($request->password),
             ]);
 
@@ -89,7 +89,7 @@ class AuthController extends Controller
     /**
      * Xử lý yêu cầu đăng xuất người dùng.
      * Hủy phiên đăng nhập hiện tại và chuyển hướng đến trang đăng nhập.
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */

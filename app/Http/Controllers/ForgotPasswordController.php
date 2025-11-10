@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ResetLinkRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use \App\Http\Requests\ResetLinkRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 
@@ -14,7 +13,7 @@ class ForgotPasswordController extends Controller
     /**
      * Hiển thị form yêu cầu gửi liên kết đặt lại mật khẩu.
      * Form cho phép người dùng nhập email để nhận liên kết reset mật khẩu.
-     * 
+     *
      * @return View
      */
     public function showLinkRequestForm(): View
@@ -24,12 +23,12 @@ class ForgotPasswordController extends Controller
 
     /**
      * Hàm kiểm tra email hợp lệ và gửi link reset mật khẩu qua email
-     * 
+     *
      * @param ResetLinkRequest $request
      * @return RedirectResponse
      */
     public function sendResetLinkEmail(ResetLinkRequest $request): RedirectResponse
-    {        
+    {
         $status = Password::sendResetLink(
             $request->only('email')
         );
