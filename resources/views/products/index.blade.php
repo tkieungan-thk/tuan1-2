@@ -5,19 +5,148 @@
         <div class="page-title-box">
             <div class="row align-items-center">
                 <div class="col-sm-6">
-                    <h4 class="page-title">Sản phẩm</h4>
+                    <h4 class="page-title">{{ __('products.page_title') }}</h4>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="javascript:void(0);">Sản phẩm</a></li>
-                        <li class="breadcrumb-item"><a href="javascript:void(0);">Danh sách</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item2') }}</a></li>
                     </ol>
                 </div>
             </div>
         </div>
 
+        <div class="row mb-3">
+            <div class="col-12 d-flex justify-content-end">
+                <a href="{{ route('products.create') }}" class="btn btn-primary">
+                    <i class="fa fa-plus"></i>
+                </a>
+            </div>
+        </div>
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
         <div class="row">
-            Danh sách sản phẩm
+            <div class="col-lg-12">
+                <div class="card m-b-30">
+                    <div class="card-body">
+
+                        <div class="mb-3">
+                            <form action="{{ route('products.index') }}" method="GET" class="form-inline row g-2">
+
+                                <div class="col-md-3">
+                                    <input type="text" name="search" value="{{ request('search') }}"
+                                        class="form-control" placeholder="{{ __('products.search_product') }}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <select name="category_id" class="form-control">
+                                        <option value="">{{ __('products.lb_category') }}</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}"
+                                                {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <input type="number" name="min_price" value="{{ request('min_price') }}"
+                                        class="form-control" placeholder="{{ __('products.min_price') }}">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <input type="number" name="max_price" value="{{ request('max_price') }}"
+                                        class="form-control" placeholder="{{ __('products.max_price') }}">
+                                </div>
+
+                                <div class="col-md-2 d-flex gap-1">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fa fa-search"></i> {{ __('products.filter') }}
+                                    </button>
+                                    <a href="{{ route('products.index') }}" class="btn btn-secondary">
+                                        <i class="fa fa-undo"></i> {{ __('products.reset') }}
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead class="thead-default">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>{{ __('products.name') }}</th>
+                                        <th>{{ __('products.category') }}</th>
+                                        <th>{{ __('products.price') }}</th>
+                                        <th>{{ __('products.stock') }}</th>
+                                        <th>{{ __('products.status') }}</th>
+                                        <th>{{ __('products.action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($products as $product)
+                                        <tr>
+                                            <td>{{ $product->id }}</td>
+                                            <td>
+                                                <a href="{{ route('products.show', $product->id) }}"
+                                                    class="text-decoration-none">
+                                                    {{ $product->name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ $product->category->name ?? '—' }}</td>
+                                            <td>{{ $product->formatted_price }}</td>
+                                            <td>
+                                                <span class="{{ $product->stock > 0 ? 'text-success' : 'text-danger' }}">
+                                                    {{ $product->stock > 0 ? __('products.stock_1') : __('products.stock_0') }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $product->status == 'active' ? 'Active' : 'Inactive' }}</td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <a href="{{ route('products.show', $product->id) }}"
+                                                        class="btn btn-info mx-1"><i class="fa fa-eye"></i></a>
+
+                                                    <a href="{{ route('products.edit', $product->id) }}"
+                                                        class="btn btn-warning mx-1"><i class="fa fa-edit"></i></a>
+
+                                                    <button type="button" class="btn btn-danger mx-1" data-toggle="modal"
+                                                        data-target="#deleteModal" data-id="{{ $product->id }}"
+                                                        data-name="{{ $product->name }}">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">{{ __('products.no_data') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-3">
+                            {{ $products->links() }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>

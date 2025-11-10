@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'page_title'     => 'Sản Phẩm',
+    'item1'          => 'Sản Phẩm',
+    'item2'          => 'Danh sách',
+    'item_create'    => 'Tạo Sản Phẩm',
+    'item_update'    => 'Cập Nhật Sản Phẩm',
+    'search_product' => 'Tìm sản phẩm',
+    'lb_category'    => 'Tất cả danh mục',
+    'min_price'      => 'Giá từ',
+    'max_price'      => 'Đến',
+    'filter'         => 'Filter',
+    'reset'          => 'Reset',
+    'name'=> 'Sản phẩm',
+    'category'=>'Danh mục',
+    'price'=> 'Giá',
+    'stock'=> 'Tồn kho',
+    'status'=> 'Trạng thái',
+    'action'=> 'Hành động',
+    'stock_0'=> 'Hết hàng',
+    'stock_1'=> 'Còn hàng',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'no_data'=> 'Không có sản phẩm nào',
+];

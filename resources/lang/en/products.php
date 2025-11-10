@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'page_title'     => 'Products',
+    'item1'          => 'Products',
+    'item2'          => 'List',
+    'item_create'    => 'Create Products',
+    'item_update'    => 'Update Products',
+    'search_product' => 'Search',
+    'lb_category'    => 'Category',
+    'min_price'      => 'Price from',
+    'max_price'      => 'To',
+    'filter'         => 'Filter',
+    'reset'          => 'Reset',
+    'name'           => 'Products',
+    'category'       => 'Categories',
+    'price'          => 'Price',
+    'stock'          => 'Stock',
+    'status'         => 'Status',
+    'action'         => 'Actions',
+    'stock_0'        => 'Out of stock',
+    'stock_1'        => 'In stock',
+    'active'         => 'Active',
+    'inactive'       => 'Inactive',
+    'no_data'        => 'No data.',
+];

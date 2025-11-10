@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -34,3 +35,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::patch('/password', [PasswordController::class, 'update'])->name('password');
 });
+
+Route::resource('products', ProductController::class);

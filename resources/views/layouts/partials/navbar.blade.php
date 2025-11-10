@@ -9,7 +9,7 @@
                     </a>
                 </li>
                 <li class="has-submenu">
-                    <a href="/product">
+                    <a href="/products">
                         <i class="icon-accelerator"></i>
                         {{ __('layout.products') }}
                     </a>
