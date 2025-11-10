@@ -5,9 +5,9 @@ return [
     'user_create_failed' => 'Failed to create user. Please try again.',
     'user_updated' => 'User has been updated successfully.',
     'user_update_failed' => 'Failed to update user. Please try again.',
-    'user_deleted'=> 'User has been deleted successfully.',
-    'user_delete_failed'=> 'Failed to delete user. Please try again.',
-    
+    'user_deleted' => 'User has been deleted successfully.',
+    'user_delete_failed' => 'Failed to delete user. Please try again.',
+
     'name_required' => 'Name is required.',
     'email_required' => 'Email is required.',
     'email_invalid' => 'Invalid email format.',

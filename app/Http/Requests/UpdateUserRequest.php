@@ -23,7 +23,7 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         $userId = $this->route('user')?->id;
-        //$user = $this->route('user');
+        // $user = $this->route('user');
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
                 'required',
                 'email',
                 Rule::unique('users', 'email')->ignore($userId),
-            ],            
+            ],
             'password' => ['nullable', 'min:6', 'confirmed'],
         ];
     }

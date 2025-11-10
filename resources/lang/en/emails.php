@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 return [
     'user_created_subject' => 'Welcome! Please set your password',

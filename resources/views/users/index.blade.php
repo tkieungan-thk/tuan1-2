@@ -84,9 +84,6 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            {{ $users->links() }}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -176,7 +173,7 @@
                 buttonSubmit.removeClass().addClass('btn btn-success px-4').text('Mở khóa');
             }
 
-            modal.find('#statusModalForm').attr('action', `/users/status/${id}`);
+            modal.find('#statusModalForm').attr('action', `/users/${id}/status`);
         });
 
         $('#deleteModal').on('show.bs.modal', function(event) {
