@@ -41,6 +41,18 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (! $user) {
+            return back()->withInput()
+                ->with('error', __('messages.account_not_found'));
+        }
+
+        if ($user->status == 0) {
+            return back()->withInput()
+                ->with('error', __('messages.account_locked'));
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 

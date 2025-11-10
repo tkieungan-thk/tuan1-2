@@ -22,7 +22,7 @@ class UserPasswordUpdatedMail extends Mailable
      */
     public function __construct(User $user, string $newPassword)
     {
-        $this->user = $user;
+        $this->user        = $user;
         $this->newPassword = $newPassword;
     }
 

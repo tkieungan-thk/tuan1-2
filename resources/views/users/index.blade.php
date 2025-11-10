@@ -43,16 +43,10 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <form action="{{ route('users.index') }}" method="GET" class="form-inline row g-2">
-                                <div class="col-md-3">
-                                    <input type="text" name="name" value="{{ request('name') }}" class="form-control"
-                                        placeholder="{{ __('users.search_name') }}">
+                                <div class="col-md-6">
+                                    <input type="text" name="keyword" value="{{ request('keyword') }}"
+                                        class="form-control" placeholder="{{ __('users.search_placeholder') }}">
                                 </div>
-
-                                <div class="col-md-3">
-                                    <input type="text" name="email" value="{{ request('email') }}" class="form-control"
-                                        placeholder="{{ __('users.search_email') }}">
-                                </div>
-
                                 <div class="col-md-3">
                                     <select name="status" class="form-control">
                                         <option value="">{{ __('users.all_status') }}</option>
@@ -237,21 +231,18 @@
             modal.find('#deleteModalForm').attr('action', `/users/${id}`);
         });
         $(document).ready(function() {
-            $('input[name="name"], input[name="email"], select[name="status"]').on('input change', function() {
-                let name = $('input[name="name"]').val();
-                let email = $('input[name="email"]').val();
+            $('input[name="keyword"], select[name="status"]').on('input change', function() {
+                let keyword = $('input[name="keyword"]').val();
                 let status = $('select[name="status"]').val();
 
                 $.ajax({
                     url: "{{ route('users.index') }}",
                     method: 'GET',
                     data: {
-                        name,
-                        email,
+                        keyword,
                         status
                     },
-                    beforeSend: function() {
-                    },
+                    beforeSend: function() {},
                     success: function(response) {
                         $('tbody').html($(response).find('tbody').html());
                     }

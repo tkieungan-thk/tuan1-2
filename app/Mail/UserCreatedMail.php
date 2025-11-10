@@ -8,7 +8,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Password;
 
 class UserCreatedMail extends Mailable
 {
@@ -16,16 +15,15 @@ class UserCreatedMail extends Mailable
 
     public $user;
 
-    public $resetUrl;
+    public $password;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, $resetUrl)
+    public function __construct(User $user, $password)
     {
-        $this->user = $user;
-        $token = Password::createToken($user);
-        $this->resetUrl = url(route('password.reset', ['token' => $token, 'email' => $user->email]));
+        $this->user     = $user;
+        $this->password = $password;
     }
 
     /**

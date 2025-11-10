@@ -21,4 +21,6 @@ return [
     'logout' => 'Logout.',
     'register_success' => 'Registration successful!',
     'register_failed' => 'Registration failed. Please try again later.', 
+    'account_not_found'=> 'Account does not exist.',
+    'account_locked'=> 'Account locked.',
 ];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Mail\UserCreatedMail;
 use App\Mail\UserPasswordUpdatedMail;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -23,12 +24,12 @@ class UserController extends Controller
     {
         $query = User::query();
 
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%'.$request->name.'%');
-        }
-
-        if ($request->filled('email')) {
-            $query->where('email', 'like', '%'.$request->email.'%');
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('email', 'like', "%{$keyword}%");
+            });
         }
 
         if ($request->filled('status') && in_array($request->status, ['0', '1'])) {
@@ -42,6 +43,8 @@ class UserController extends Controller
 
     /**
      * Hiển thị form tạo người dùng mới
+     * 
+     * @return View
      */
     public function create(): View
     {
@@ -51,17 +54,19 @@ class UserController extends Controller
     /**
      * Lưu người dùng mới vào cơ sở dữ liệu.
      *
+     * @param CreateUserRequest $request
      * @return RedirectResponse .
      */
     public function store(CreateUserRequest $request): RedirectResponse
     {
         try {
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
+                'name'     => $request->name,
+                'email'    => $request->email,
                 'password' => Hash::make($request->password),
-                'status' => true,
+                'status'   => true,
             ]);
+            Mail::to($user->email)->send(new UserCreatedMail($user, $request->password));
 
             return redirect()
                 ->route('users.index')
@@ -77,6 +82,7 @@ class UserController extends Controller
      * Hiển thị form chỉnh sửa thông tin người dùng.
      *
      * @param User
+     * @return View
      */
     public function edit(User $user): View
     {
@@ -87,28 +93,30 @@ class UserController extends Controller
      * Cập nhật thông tin người dùng.
      *
      * @param User
+     * @param UpdateUserRequest $request
+     * @return RedirectResponse
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         try {
             $validated = $request->validated();
 
-            $dirty = false;
+            $dirty           = false;
             $passwordChanged = false;
 
             if ($user->name !== $validated['name']) {
                 $user->name = $validated['name'];
-                $dirty = true;
+                $dirty      = true;
             }
 
             if ($user->email !== $validated['email']) {
                 $user->email = $validated['email'];
-                $dirty = true;
+                $dirty       = true;
             }
 
             if (! empty($validated['password'])) {
-                $user->password = Hash::make($validated['password']);
-                $dirty = true;
+                $user->password  = Hash::make($validated['password']);
+                $dirty           = true;
                 $passwordChanged = true;
             }
 
@@ -135,6 +143,7 @@ class UserController extends Controller
      * Xử lý xóa người dùng
      *
      * @param User
+     * @return RedirectResponse
      */
     public function destroy(User $user): RedirectResponse
     {
@@ -143,7 +152,7 @@ class UserController extends Controller
 
             return redirect()
                 ->route('users.index')
-                ->with('success', 'messages.user_deleted');
+                ->with('success', __('messages.user_deleted'));
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -159,11 +168,19 @@ class UserController extends Controller
      */
     public function updateStatus(User $user): RedirectResponse
     {
-        $user->status = ! $user->status;
-        $user->save();
+        try {
+            $user->status = ! $user->status;
+            $user->save();
 
-        return redirect()
-            ->route('users.index')
-            ->with('success', __('users.update_status'));
+            $message = $user->status
+                ? __('users.account_unlocked')
+                : __('users.account_locked');
+
+            return redirect()
+                ->route('users.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', __('users.update_status_failed'));
+        }
     }
 }

@@ -1,25 +1,14 @@
-{{-- <x-mail::message>
-# Introduction
+<x-mail::message>
+# Hello {{ $user->name }}
 
-The body of your message.
+<p>Your account has been successfully created on the system.</p>
 
-<x-mail::button :url="''">
-Button Text
-</x-mail::button>
+<p><strong>Login information:</strong></p>
+<ul>
+<li>Email: {{ $user->email }}</li>
+<li>Password: {{ $password }}</li>
+</ul>
 
 Thanks,<br>
 {{ config('app.name') }}
-</x-mail::message> --}}
-
-
-@component('mail::message')
-# {{ __('emails.user_created_greeting', ['name' => $user->name]) }}
-
-{{ __('emails.user_created_body') }}
-
-@component('mail::button', ['url' => $resetUrl])
-{{ __('emails.user_created_button') }}
-@endcomponent
-
-{{ __('emails.user_created_footer') }}
-@endcomponent
+</x-mail::message>
