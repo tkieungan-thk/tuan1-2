@@ -15,7 +15,7 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
 Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
 Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-Route::post('/users/update/{id}', [UserController::class, 'update'])->name('users.update');
+Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
 Route::patch('/users/status/{user}', [UserController::class, 'updateStatus'])
     ->name('users.updateStatus');
 Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
