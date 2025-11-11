@@ -277,7 +277,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Đồng bộ lại attributes của sản phẩm (thêm, sửa, xóa).
+     * Đồng bộ attributes của sản phẩm
      *
      * @param  Product  $product
      * @param  array<int, array{id?: int, name: string, values: array<int,string>|string}>  $newAttributes
