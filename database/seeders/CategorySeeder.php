@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
@@ -15,25 +14,25 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
-                'name' => 'Điện thoại',
-                'description' => 'Các dòng điện thoại thông minh'
+                'name'        => 'Điện thoại',
+                'description' => 'Các dòng điện thoại thông minh',
             ],
             [
-                'name' => 'Laptop',
-                'description' => 'Máy tính xách tay các hãng'
+                'name'        => 'Laptop',
+                'description' => 'Máy tính xách tay các hãng',
             ],
             [
-                'name' => 'Tablet',
-                'description' => 'Máy tính bảng'
+                'name'        => 'Tablet',
+                'description' => 'Máy tính bảng',
             ],
             [
-                'name' => 'Phụ kiện',
-                'description' => 'Phụ kiện điện tử'
+                'name'        => 'Phụ kiện',
+                'description' => 'Phụ kiện điện tử',
             ],
             [
-                'name' => 'Đồng hồ thông minh',
-                'description' => 'Smartwatch và wearable devices'
-            ]
+                'name'        => 'Đồng hồ thông minh',
+                'description' => 'Smartwatch và wearable devices',
+            ],
         ];
 
         foreach ($categories as $category) {

@@ -9,7 +9,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a></li>
                         <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item2') }}</a></li>
                     </ol>
                 </div>
@@ -124,7 +124,8 @@
 
                                                     <button type="button" class="btn btn-danger mx-1" data-toggle="modal"
                                                         data-target="#deleteModal" data-id="{{ $product->id }}"
-                                                        data-name="{{ $product->name }}">
+                                                        data-name="{{ $product->name }}"
+                                                        data-url="{{ route('products.destroy', $product->id) }}">
                                                         <i class="fa fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -148,6 +149,52 @@
                 </div>
             </div>
         </div>
-
     </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title mt-0">{{ __('products.title_delete_product') }}</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <p id="deleteModalMessage"></p>
+                    <i class="fa fa-trash text-danger fa-3x mb-3"></i>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-secondary px-4"
+                        data-dismiss="modal">{{ __('products.btn_cancel') }}</button>
+                    <form id="deleteModalForm" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger px-4">{{ __('products.btn_deleted_product') }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script>
+        $(document).ready(function() {
+            const translations = {
+                deleteMessage: "{!! __('products.delete_message', ['name' => '__NAME__']) !!}"
+            };
+            $('#deleteModal').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const id = button.data('id');
+                const name = button.data('name');
+                const url = button.data('url');
+
+                const modal = $(this);
+                modal.find('#deleteModalMessage').html(
+                    translations.deleteMessage.replace('__NAME__', name)
+                );
+                modal.find('#deleteModalForm').attr('action', url);
+            });
+        });
+    </script>
 @endsection

@@ -3,87 +3,84 @@
 @section('title', $product->name)
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-            <div>
-                @if($product->mainImage)
-                    <div class="mb-4">
-                        <img src="{{ asset('storage/' . $product->mainImage->image_path) }}" 
-                             alt="{{ $product->name }}" class="w-full rounded-lg">
-                    </div>
-                @endif
-
-                @if($product->images->count() > 1)
-                    <div class="grid grid-cols-4 gap-2">
-                        @foreach($product->images as $image)
-                            <img src="{{ asset('storage/' . $image->image_path) }}" 
-                                 alt="{{ $product->name }}" 
-                                 class="w-20 h-20 object-cover rounded border-2 {{ $image->is_main ? 'border-blue-500' : 'border-gray-200' }}">
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-
-            <div>
-                <h1 class="text-3xl font-bold mb-4">{{ $product->name }}</h1>
-                
-                <p class="text-gray-600 mb-4">
-                    Danh mục: <span class="font-semibold">{{ $product->category->name }}</span>
-                </p>
-
-                <div class="text-3xl font-bold text-red-600 mb-6">
-                    {{ $product->formatted_price }}
+    <div class="container-fluid">
+        <div class="page-title-box">
+            <div class="row align-items-center">
+                <div class="col-sm-6">
+                    <h4 class="page-title">{{ __('products.page_title') }}</h4>
                 </div>
-
-                @if($product->attributes->count() > 0)
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-3">Thông số kỹ thuật</h3>
-                        @foreach($product->attributes as $attribute)
-                            <div class="flex border-b border-gray-200 py-2">
-                                <span class="font-medium w-1/3">{{ $attribute->name }}:</span>
-                                <span class="w-2/3">
-                                    {{ $attribute->values->pluck('value')->implode(', ') }}
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-
-                <div class="mb-6">
-                    <span class="text-lg {{ $product->stock > 0 ? 'text-green-600' : 'text-red-600' }}">
-                        {{ $product->stock > 0 ? '✓ Còn hàng' : '✗ Hết hàng' }}
-                    </span>
-                    <span class="text-gray-600 ml-2">({{ $product->stock }} sản phẩm)</span>
-                </div>
-
-                <div class="flex space-x-4">
-                    <button class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-                        Thêm vào giỏ hàng
-                    </button>
-                    <button class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold">
-                        Mua ngay
-                    </button>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-right">
+                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item_detail') }}</a></li>
+                    </ol>
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card m-b-30">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                @if ($product->mainImage)
+                                    <div class="mb-3 text-center">
+                                        <img src="{{ asset('storage/' . $product->mainImage->image_path) }}"
+                                            alt="{{ $product->name }}" class="img-fluid rounded border shadow-sm">
+                                    </div>
+                                @endif
 
-        <div class="border-t border-gray-200 p-8">
-            <h2 class="text-2xl font-bold mb-4">Mô tả sản phẩm</h2>
-            <div class="prose max-w-none">
-                {!! nl2br(e($product->description)) !!}
+                                @if ($product->images->count() > 1)
+                                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                        @foreach ($product->images as $image)
+                                            <img src="{{ asset('storage/' . $image->image_path) }}"
+                                                alt="{{ $product->name }}"
+                                                class="rounded border {{ $image->is_main ? 'border-primary' : 'border-secondary' }}"
+                                                style="width:80px; height:80px; object-fit:cover;">
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="col-md-6">
+                                <h2 class="fw-bold mb-3">{{ $product->name }}</h2>
+                                <p class="text-muted mb-2">
+                                    <strong>{{ __('products.category') }}: </strong> {{ $product->category->name }}
+                                </p>
+
+                                <h3 class="text-danger fw-bold mb-4">{{ $product->formatted_price }}</h3>
+
+                                @if ($product->attributes->count() > 0)
+                                    <h5 class="fw-semibold mb-2">{{ __('products.information') }}</h5>
+                                    <table class="table table-sm table-bordered mb-4">
+                                        <tbody>
+                                            @foreach ($product->attributes as $attribute)
+                                                <tr>
+                                                    <th style="width: 40%">{{ $attribute->name }}</th>
+                                                    <td>{{ $attribute->values->pluck('value')->implode(', ') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @endif
+
+                                <div class="mb-4">
+                                    <span class="fw-bold {{ $product->stock > 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ $product->stock > 0 ? '✓ '. __('products.stock_0') : '✗ '. __('products.stock_0') }}
+                                    </span>
+                                    <span class="text-muted ms-2">({{ $product->stock }} {{ __('products.name') }})</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h4 class="fw-bold mb-3">{{ __('products.description') }}</h4>
+                        <div class="border p-3 rounded bg-light">
+                            {!! nl2br(e($product->description)) !!}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    @if($relatedProducts->count() > 0)
-        <div class="mt-12">
-            <h2 class="text-2xl font-bold mb-6">Sản phẩm liên quan</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach($relatedProducts as $relatedProduct)
-                @endforeach
-            </div>
-        </div>
-    @endif
-</div>
 @endsection

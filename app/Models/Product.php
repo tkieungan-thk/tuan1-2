@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,13 +22,15 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'stock' => 'integer',
+        'price'  => 'decimal:2',
+        'stock'  => 'integer',
         'status' => 'string',
     ];
 
     const STATUS_ACTIVE = 'active';
+
     const STATUS_INACTIVE = 'inactive';
+
     const STATUS_DRAFT = 'draft';
 
     public function category(): BelongsTo
@@ -50,6 +52,7 @@ class Product extends Model
     {
         return $this->hasMany(Attribute::class);
     }
+
     /**
      * Scope cho sản phẩm active
      */
@@ -89,7 +92,7 @@ class Product extends Model
     {
         return $this->attributes->mapWithKeys(function ($attribute) {
             return [
-                $attribute->name => $attribute->values->pluck('value')->toArray()
+                $attribute->name => $attribute->values->pluck('value')->toArray(),
             ];
         });
     }
