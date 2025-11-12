@@ -23,10 +23,10 @@ return [
         'inactive' => 'Ngưng bán',
         'draft'    => 'Bản nháp',
     ],
-    'action'  => 'Hành động',
-    'stock_0' => 'Hết hàng',
-    'stock_1' => 'Còn hàng',
-    'stock_enum'   => [
+    'action'     => 'Hành động',
+    'stock_0'    => 'Hết hàng',
+    'stock_1'    => 'Còn hàng',
+    'stock_enum' => [
         'in_stock'               => 'Còn hàng',
         'out_of_stock'           => 'Hết hàng',
         'in_stock_with_quantity' => 'Còn hàng (:quantity sản phẩm)',
@@ -64,6 +64,7 @@ return [
     'created_success'         => 'Tạo sản phẩm thành công!',
     'created_error'           => 'Đã xảy ra lỗi khi tạo sản phẩm: :error',
     'updated_success'         => 'Cập nhật sản phẩm thành công!',
+    'no_changes'              => 'Không thay đổi khi cập nhật sản phẩm.',
     'updated_error'           => 'Đã xảy ra lỗi khi cập nhật sản phẩm: :error',
     'deleted_success'         => 'Xóa sản phẩm thành công!',
     'deleted_error'           => 'Đã xảy ra lỗi khi xóa sản phẩm: :error',

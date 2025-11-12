@@ -11,12 +11,35 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a>
+                        </li>
                         <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item_detail') }}</a></li>
                     </ol>
                 </div>
             </div>
         </div>
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ session('info') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
         <div class="row">
             <div class="col-lg-12">
                 <div class="card m-b-30">
@@ -66,7 +89,7 @@
 
                                 <div class="mb-4">
                                     <span class="fw-bold {{ $product->stock > 0 ? 'text-success' : 'text-danger' }}">
-                                        {{ $product->stock > 0 ? '✓ '. __('products.stock_0') : '✗ '. __('products.stock_0') }}
+                                        {{ $product->stock > 0 ? '✓ ' . __('products.stock_0') : '✗ ' . __('products.stock_0') }}
                                     </span>
                                     <span class="text-muted ms-2">({{ $product->stock }} {{ __('products.name') }})</span>
                                 </div>

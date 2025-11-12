@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateProductRequest;
-use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\ProductRequest;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -20,30 +18,20 @@ class ProductController extends Controller
     /**
      * Hiển thị danh sách sản phẩm.
      *
-     * @param  Request  $request
+     * @param  ProductRequest  $request
      * @return View
      */
-    public function index(Request $request): View
+    public function index(ProductRequest $request): View
     {
-        $query = Product::with(['category', 'images', 'attributes.values'])
-            ->where('status', 'active');
+        $safe = $request->safe()->only(['search', 'category_id', 'min_price', 'max_price', 'status']);
 
-        if ($request->has('category_id') && $request->category_id) {
-            $query->where('category_id', $request->category_id);
-        }
+        $products = Product::query()
+            ->filter($safe)
+            ->with(['category', 'images', 'attributes.values'])
+            ->latest('id')
+            ->paginate(Product::PAGINATION_PER_PAGE)
+            ->withQueryString();
 
-        if ($request->has('min_price') && $request->min_price) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->has('max_price') && $request->max_price) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        if ($request->has('search') && $request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        $products   = $query->paginate(12);
         $categories = Category::all();
 
         return view('products.index', compact('products', 'categories'));
@@ -52,16 +40,12 @@ class ProductController extends Controller
     /**
      * Hiển thị chi tiết sản phẩm theo ID.
      *
-     * @param  int  $id
+     * @param  Product $product
      * @return View
      */
-    public function show($id): View
+    public function show(Product $product): View
     {
-        $product = Product::with([
-            'category',
-            'images',
-            'attributes.values',
-        ])->findOrFail($id);
+        $product->loadMissing(['category', 'images', 'attributes.values']);
 
         return view('products.show', compact('product'));
     }
@@ -81,10 +65,10 @@ class ProductController extends Controller
     /**
      * Lưu sản phẩm vào database.
      *
-     * @param  CreateProductRequest  $request
+     * @param  ProductRequest  $request
      * @return RedirectResponse
      */
-    public function store(CreateProductRequest $request): RedirectResponse
+    public function store(ProductRequest $request): RedirectResponse
     {
         DB::beginTransaction();
 
@@ -95,7 +79,7 @@ class ProductController extends Controller
                 'description' => $request->description,
                 'price'       => $request->price,
                 'stock'       => $request->stock,
-                'status'      => $request->status ?? 'active',
+                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
             if ($request->hasFile('images')) {
@@ -130,8 +114,7 @@ class ProductController extends Controller
     {
         foreach ($images as $index => $image) {
             if ($image->isValid()) {
-                $path = $image->store('products', 'public');
-
+                $path = $image->store(Product::IMAGE_STORAGE_PATH, Product::IMAGE_DISK);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
@@ -180,13 +163,12 @@ class ProductController extends Controller
     /**
      * Hiển thị form chỉnh sửa sản phẩm.
      *
-     * @param  int  $id
+     * @param  Product $product
      * @return View
      */
-    public function edit($id): View
+    public function edit(Product $product): View
     {
-        $product = Product::with(['category', 'images', 'attributes.values'])
-            ->findOrFail($id);
+        $product->loadMissing(['category', 'images', 'attributes.values']);
         $categories = Category::all();
 
         return view('products.edit', compact('product', 'categories'));
@@ -195,50 +177,87 @@ class ProductController extends Controller
     /**
      * Cập nhật thông tin sản phẩm.
      *
-     * @param  UpdateProductRequest  $request
-     * @param  int  $id
+     * @param  ProductRequest  $request
+     * @param  Product $product
      * @return RedirectResponse
      */
-    public function update(UpdateProductRequest $request, $id): RedirectResponse
+    public function update(ProductRequest $request, Product $product): RedirectResponse
     {
         DB::beginTransaction();
 
         try {
-            $product = Product::findOrFail($id);
-
-            $product->update([
+            $product->fill([
                 'name'        => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
                 'price'       => $request->price,
                 'stock'       => $request->stock,
-                'status'      => $request->status ?? 'active',
+                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
-            if ($request->hasFile('images')) {
-                $this->processProductImages($product, $request->file('images'), $request->main_image_index);
+            $hasChanges = false;
+
+            if ($product->isDirty()) {
+                $product->save();
+                $hasChanges = true;
             }
 
-            if ($request->has('existing_main_image')) {
-                $this->updateMainImage($product, $request->existing_main_image);
+            $imageChanges = $this->handleImageUpdates($product, $request);
+
+            $attributeChanges = $this->handleAttributeUpdates($product, $request);
+
+            if ($hasChanges || $imageChanges || $attributeChanges) {
+                DB::commit();
+
+                return redirect()->route('products.show', $product)
+                    ->with('success', __('products.updated_success'));
+            } else {
+                DB::rollBack();
+
+                return redirect()->route('products.show', $product)
+                    ->with('info', __('products.no_changes'));
             }
-
-            if ($request->has('delete_images')) {
-                $this->deleteProductImages($product, $request->delete_images);
-            }
-
-            $this->syncProductAttributes($product, $request->input('attributes', []));
-
-            DB::commit();
-
-            return redirect()->route('products.show', $product->id)
-                ->with('success', __('products.updated_success'));
         } catch (\Exception $e) {
             DB::rollBack();
 
             return back()->withInput()
-                ->with('error', __('products.updated_error') . $e->getMessage());
+                ->with('error', __('products.updated_error'));
         }
+    }
+
+    /**
+     * Xử lý cập nhật ảnh khi cập nhật sản phẩm
+     *
+     * @param  ProductRequest  $request
+     * @param  Product $product
+     * @return bool
+     */
+    private function handleImageUpdates(Product $product, ProductRequest $request): bool
+    {
+        $hasImageChanges = false;
+
+        if ($request->hasFile('images')) {
+            $this->processProductImages(
+                $product,
+                $request->file('images'),
+                $request->main_image_index
+            );
+            $hasImageChanges = true;
+        }
+
+        if ($request->filled('existing_main_image')) {
+            if ($this->updateMainImage($product, $request->existing_main_image)) {
+                $hasImageChanges = true;
+            }
+        }
+
+        if ($request->filled('delete_images')) {
+            if ($this->deleteProductImages($product, $request->delete_images)) {
+                $hasImageChanges = true;
+            }
+        }
+
+        return $hasImageChanges;
     }
 
     /**
@@ -246,81 +265,147 @@ class ProductController extends Controller
      *
      * @param  Product  $product
      * @param  int  $imageId
-     * @return void
+     * @return bool
      */
-    private function updateMainImage(Product $product, int $imageId): void
+    private function updateMainImage(Product $product, int $imageId): bool
     {
-        $product->images()->update(['is_main' => false]);
+        $currentMainImage = $product->images()->where('is_main', true)->first();
 
+        if ($currentMainImage && $currentMainImage->id == $imageId) {
+            return false;
+        }
+
+        $product->images()->update(['is_main' => false]);
         $product->images()->where('id', $imageId)->update(['is_main' => true]);
+
+        return true;
     }
 
     /**
-     * Xóa ảnh sản phẩm theo ID.
+     * Xóa ảnh sản phẩm
      *
      * @param  Product  $product
      * @param  array<int,int>  $imageIds
      * @return void
      */
-    private function deleteProductImages(Product $product, array $imageIds): void
+    private function deleteProductImages(Product $product, array $imageIds): bool
     {
+        if (empty($imageIds)) {
+            return false;
+        }
+
         $imagesToDelete = $product->images()->whereIn('id', $imageIds)->get();
 
-        foreach ($imagesToDelete as $image) {
-            Storage::disk('public')->delete($image->image_path);
-            $image->delete();
+        if ($imagesToDelete->isEmpty()) {
+            return false;
         }
 
-        if ($product->images()->count() > 0 && ! $product->images()->where('is_main', true)->exists()) {
+        $imagePaths = $imagesToDelete->pluck('image_path')->filter()->toArray();
+
+        if (! empty($imagePaths)) {
+            Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
+        }
+
+        $wasMainImageDeleted = $imagesToDelete->contains('is_main', true);
+
+        $product->images()->whereIn('id', $imageIds)->delete();
+
+        if ($wasMainImageDeleted && $product->images()->exists()) {
             $product->images()->first()->update(['is_main' => true]);
         }
+
+        return true;
+    }
+
+    /**
+     * Xử lý khi thuộc tính có thay đổi
+     *
+     * @param  Product  $product
+     * @param  array<int, array{id?: int, name: string, values: array<int,string>|string}>  $newAttributes
+     * @return void
+     */
+    private function handleAttributeUpdates(Product $product, ProductRequest $request): bool
+    {
+        $attributes = $request->input('attributes', []);
+        
+        if (empty($attributes) || collect($attributes)->filter()->isEmpty()) {
+            return false;
+        }
+
+        $this->syncProductAttributes($product, $attributes);
+
+        return true;
     }
 
     /**
      * Đồng bộ attributes của sản phẩm
      *
-     * @param  Product  $product
-     * @param  array<int, array{id?: int, name: string, values: array<int,string>|string}>  $newAttributes
-     * @return void
      */
     private function syncProductAttributes(Product $product, array $newAttributes): void
     {
         $existingAttributeIds = [];
 
         foreach ($newAttributes as $attributeData) {
-            if (! empty($attributeData['name']) && ! empty($attributeData['values'])) {
-                $attribute = Attribute::updateOrCreate(
-                    [
-                        'id'         => $attributeData['id'] ?? null,
-                        'product_id' => $product->id,
-                    ],
-                    [
-                        'name' => $attributeData['name'],
-                    ]
-                );
-
-                $existingAttributeIds[] = $attribute->id;
-
-                $attribute->values()->delete();
-
-                $values = is_array($attributeData['values'])
-                    ? $attributeData['values']
-                    : array_map('trim', explode(',', $attributeData['values']));
-
-                foreach ($values as $value) {
-                    if (! empty($value)) {
-                        AttributeValue::create([
-                            'attribute_id' => $attribute->id,
-                            'value'        => $value,
-                        ]);
-                    }
-                }
+            if (empty($attributeData['name']) || empty($attributeData['values'])) {
+                continue;
             }
+
+            $attribute = Attribute::updateOrCreate(
+                [
+                    'id'         => $attributeData['id'] ?? null,
+                    'product_id' => $product->id,
+                ],
+                [
+                    'name' => trim($attributeData['name']),
+                ]
+            );
+
+            $existingAttributeIds[] = $attribute->id;
+
+            $values = $this->parseAttributeValues($attributeData['values']);
+            $this->syncAttributeValues($attribute, $values);
         }
 
-        Attribute::where('product_id', $product->id)
-            ->whereNotIn('id', $existingAttributeIds)
-            ->delete();
+        if (! empty($existingAttributeIds)) {
+            Attribute::where('product_id', $product->id)
+                ->whereNotIn('id', $existingAttributeIds)
+                ->delete();
+        }
+    }
+
+    /**
+     * Đồng bộ values cho attribute
+     */
+    private function syncAttributeValues(Attribute $attribute, array $newValues): void
+    {
+        $normalizedValues = array_unique(array_map('trim', $newValues));
+
+        $attribute->values()->delete();
+
+        foreach ($normalizedValues as $value) {
+            if (! empty($value)) {
+                AttributeValue::create([
+                    'attribute_id' => $attribute->id,
+                    'value'        => $value,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Parse values
+     */
+    private function parseAttributeValues(mixed $values): array
+    {
+        if (is_array($values)) {
+            return $values;
+        }
+
+        if (is_string($values)) {
+            return array_map('trim', explode(',', $values));
+        }
+
+        return [];
     }
 
     /**
@@ -329,16 +414,14 @@ class ProductController extends Controller
      * @param  int  $id
      * @return RedirectResponse
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(Product $product): RedirectResponse
     {
         DB::beginTransaction();
 
         try {
-            $product = Product::with(['images', 'attributes.values'])->findOrFail($id);
+            $product->load(['images']);
 
-            foreach ($product->images as $image) {
-                Storage::disk('public')->delete($image->image_path);
-            }
+            $this->deleteAllProductImages($product);
 
             $product->delete();
 
@@ -351,5 +434,26 @@ class ProductController extends Controller
 
             return back()->with('error', __('products.deleted_error') . $e->getMessage());
         }
+    }
+
+    /**
+     * Xóa tất cả ảnh của sản phẩm khi xóa sản phẩm
+     *
+     * @param Product $product
+     * @return void
+     */
+    private function deleteAllProductImages(Product $product): void
+    {
+        if ($product->images->isEmpty()) {
+            return;
+        }
+
+        $imagePaths = $product->images->pluck('image_path')->filter()->toArray();
+
+        if (! empty($imagePaths)) {
+            Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
+        }
+
+        $product->images()->delete();
     }
 }

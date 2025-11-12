@@ -23,10 +23,10 @@ return [
         'inactive' => 'Inactive',
         'draft'    => 'Draft',
     ],
-    'action'  => 'Actions',
-    'stock_0' => 'Out of stock',
-    'stock_1' => 'In stock',
-    'stock_enum'   => [
+    'action'     => 'Actions',
+    'stock_0'    => 'Out of stock',
+    'stock_1'    => 'In stock',
+    'stock_enum' => [
         'in_stock'               => 'In stock',
         'out_of_stock'           => 'Out of stock',
         'in_stock_with_quantity' => 'In stock (:quantity available)',
@@ -64,6 +64,7 @@ return [
     'created_success'         => 'Product created successfully!',
     'created_error'           => 'An error occurred while creating the product: :error',
     'updated_success'         => 'Product updated successfully!',
+    'no_changes'              => 'No changes when updating products.',
     'updated_error'           => 'An error occurred while updating the product: :error',
     'deleted_success'         => 'Product deleted successfully!',
     'deleted_error'           => 'An error occurred while deleting the product: :error',
