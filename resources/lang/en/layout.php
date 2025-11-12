@@ -1,8 +1,10 @@
 <?php
 
 return [
-    'title' => 'Admin',
+    'title'      => 'Admin',
     'categories' => 'Categories',
-    'products' => 'Products',
-    'users' => 'Users',
+    'products'   => 'Products',
+    'users'      => 'Users',
+    'profile'    => 'Profile',
+    'logout'     => 'Logout',
 ];

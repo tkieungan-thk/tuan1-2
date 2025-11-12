@@ -1,9 +1,14 @@
 <?php
 
 return [
-    'user_created_subject' => 'Welcome! Please set your password',
-    'user_created_greeting' => 'Hello :name,',
-    'user_created_body' => 'Your account has been created. Please click the button below to set your password.',
-    'user_created_button' => 'Set Your Password',
-    'user_created_footer' => 'Thank you for joining our platform!',
+    'user_created_subject' => 'Your account has been created successfully!',
+    'user_updated_subject' => 'Your Account Has Been Updated',
+    'hello'                => 'Hello',
+    'account_created'      => 'Your account has been successfully created. Here are your login details:',
+    'account_updated'      => 'Your account information has been updated.',
+    'login_email'          => 'Email',
+    'password'             => 'Password',
+    'new_password'         => 'New Password',
+    'login_now'            => 'Login Now',
+    'thank_you'            => 'Thank you for using our system!',
 ];

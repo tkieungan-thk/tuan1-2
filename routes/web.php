@@ -7,6 +7,15 @@ use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+
+Route::get('lang/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'vi'])) {
+        Session::put('locale', $locale);
+    }
+
+    return redirect()->back();
+})->name('change.language');
 
 Route::get('/', function () {
     if (Auth::check()) {

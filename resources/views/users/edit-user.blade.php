@@ -41,7 +41,7 @@
 
                     <div class="form-group">
                         <label for="password">{{ __('users.password') }}</label>
-                        <input type="password" id="password" name="password" class="form-control" required>
+                        <input type="password" id="password" name="password" class="form-control">
                         @error('password')
                             <span class="text-danger small">{{ $message }}</span>
                         @enderror
@@ -49,8 +49,7 @@
 
                     <div class="form-group">
                         <label for="password_confirmation">{{ __('users.confirm_password') }}</label>
-                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control"
-                            required>
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control">
                     </div>
 
                     <div class="form-group mt-4">

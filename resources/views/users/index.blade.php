@@ -42,25 +42,25 @@
                 <div class="card m-b-30">
                     <div class="card-body">
                         <div class="mb-3">
-                            <form action="{{ route('users.index') }}" method="GET" class="form-inline row g-2">
-                                <div class="col-md-6">
+                            <form action="{{ route('users.index') }}" method="GET" class="align-items-center row g-2">
+                                <div class="col-md-6 mb-2 mb-md-0">
                                     <input type="text" name="keyword" value="{{ request('keyword') }}"
                                         class="form-control" placeholder="{{ __('users.search_placeholder') }}">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-3 mb-2 mb-md-0">
                                     <select name="status" class="form-control">
                                         <option value="">{{ __('users.all_status') }}</option>
-                                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
-                                            {{ __('users.active') }}
-                                        </option>
-                                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
-                                            {{ __('users.inactive') }}
-                                        </option>
+                                        @foreach ($statuses as $status)
+                                            <option value="{{ $status->value }}"
+                                                {{ request()->has('status') && request('status') == $status->value ? 'selected' : '' }}>
+                                                {{ $status->label() }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-primary">
+                                <div class="col-md-3 d-flex justify-content-end gap-2">
+                                    <button type="submit" class="btn btn-primary mr-2">
                                         <i class="fa fa-search"></i> {{ __('users.filter') }}
                                     </button>
                                     <a href="{{ route('users.index') }}" class="btn btn-secondary">
@@ -71,14 +71,13 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table mb-0">
+                            <table class="table mb-0 table-hover">
                                 <thead class="thead-default">
                                     <tr>
                                         <th>#</th>
                                         <th>{{ __('users.username') }}</th>
                                         <th>Email</th>
-                                        <th>{{ __('users.status') }}</th>
-                                        <th>{{ __('users.actions') }}</th>
+                                        <th th scope="col" colspan="2">{{ __('users.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -87,17 +86,20 @@
                                             <td>{{ $user->id }}</td>
                                             <td>{{ $user->name }}</td>
                                             <td>{{ $user->email }}</td>
-                                            <td>{{ $user->status ? 'Active' : 'Inactive' }}</td>
                                             <td>
+                                                <span class="badge badge-{{ $user->status->color() }}">
+                                                    {{ $user->status->label() }}
+                                                </span>
+                                            <td class="d-flex justify-content-end">
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('users.edit', $user->id) }}"
                                                         class="btn btn-warning mx-1"><i class="fa fa-edit"></i></a>
                                                     <button type="button"
-                                                        class="btn {{ $user->status ? 'btn-warning' : 'btn-success' }} mx-1"
+                                                        class="btn btn-{{ $user->status === \App\Enums\UserStatus::ACTIVE ? 'success' : 'warning' }} mx-1"
                                                         data-toggle="modal" data-target="#statusModal"
                                                         data-id="{{ $user->id }}" data-name="{{ $user->name }}"
-                                                        data-status="{{ $user->status }}">
-                                                        <i class="fa {{ $user->status ? 'fa-lock' : 'fa-unlock' }}"></i>
+                                                        data-status="{{ $user->status->value }}">
+                                                        <i class="fa {{ $user->status->icon() }}"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-danger mx-1" data-toggle="modal"
                                                         data-target="#deleteModal" data-id="{{ $user->id }}"
@@ -112,11 +114,6 @@
                             </table>
                         </div>
                     </div>
-                    {{-- <div class="card-body">
-                        <div class="pagination justify-content-end">
-                            {{ $users->links() }}
-                        </div>
-                    </div> --}}
                 </div>
             </div>
         </div>

@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use App\Mail\UserCreatedMail;
-use App\Mail\UserPasswordUpdatedMail;
+use App\Enums\UserStatus;
+use App\Http\Requests\UserRequest;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -20,30 +16,26 @@ class UserController extends Controller
      *
      * @return View.
      */
-    public function index(Request $request)
+    public function index(UserRequest $request): View
     {
-        $query = User::query();
+        $safe = $request->safe()->only(['keyword', 'status']);
 
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('email', 'like', "%{$keyword}%");
-            });
-        }
+        $keyword = $safe['keyword'] ?? null;
+        $status  = $safe['status'] ?? null;
 
-        if ($request->filled('status') && in_array($request->status, ['0', '1'])) {
-            $query->where('status', $request->status);
-        }
+        $users = User::query()
+            ->search($keyword)
+            ->status($status)
+            ->lasted()
+            ->get();
+        $statuses = UserStatus::cases();
 
-        $users = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
-
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'statuses'));
     }
 
     /**
      * Hiển thị form tạo người dùng mới
-     * 
+     *
      * @return View
      */
     public function create(): View
@@ -54,19 +46,19 @@ class UserController extends Controller
     /**
      * Lưu người dùng mới vào cơ sở dữ liệu.
      *
-     * @param CreateUserRequest $request
+     * @param UserRequest $request
      * @return RedirectResponse .
      */
-    public function store(CreateUserRequest $request): RedirectResponse
+    public function store(UserRequest $request): RedirectResponse
     {
         try {
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
-                'password' => Hash::make($request->password),
-                'status'   => true,
+                'password' => $request->password,
+                'status'   => UserStatus::ACTIVE,
             ]);
-            Mail::to($user->email)->send(new UserCreatedMail($user, $request->password));
+            $user->notify(new UserNotification($request->password, 'created'));
 
             return redirect()
                 ->route('users.index')
@@ -93,39 +85,27 @@ class UserController extends Controller
      * Cập nhật thông tin người dùng.
      *
      * @param User
-     * @param UpdateUserRequest $request
+     * @param UserRequest $request
      * @return RedirectResponse
      */
-    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    public function update(UserRequest $request, User $user): RedirectResponse
     {
         try {
             $validated = $request->validated();
 
-            $dirty           = false;
-            $passwordChanged = false;
-
-            if ($user->name !== $validated['name']) {
-                $user->name = $validated['name'];
-                $dirty      = true;
+            if (empty($validated['password'])) {
+                unset($validated['password']);
             }
 
-            if ($user->email !== $validated['email']) {
-                $user->email = $validated['email'];
-                $dirty       = true;
-            }
+            $user->fill($validated);
 
-            if (! empty($validated['password'])) {
-                $user->password  = Hash::make($validated['password']);
-                $dirty           = true;
-                $passwordChanged = true;
-            }
+            $passwordChanged = $user->isDirty('password');
 
-            if ($dirty) {
+            if ($user->isDirty()) {
                 $user->save();
+
                 if ($passwordChanged) {
-                    Mail::to($user->email)->send(
-                        new UserPasswordUpdatedMail($user, $validated['password'])
-                    );
+                    $user->notify(new UserNotification($request->password, 'updated'));
                 }
             }
 
@@ -133,6 +113,8 @@ class UserController extends Controller
                 ->route('users.index')
                 ->with('success', __('messages.user_updated'));
         } catch (\Exception $e) {
+            report($e);
+
             return back()
                 ->withInput()
                 ->with('error', __('messages.user_update_failed'));
@@ -169,10 +151,12 @@ class UserController extends Controller
     public function updateStatus(User $user): RedirectResponse
     {
         try {
-            $user->status = ! $user->status;
+            $user->status = $user->status === UserStatus::ACTIVE
+                            ? UserStatus::LOCKED
+                            : UserStatus::ACTIVE;
             $user->save();
 
-            $message = $user->status
+            $message = $user->status === UserStatus::ACTIVE
                 ? __('users.account_unlocked')
                 : __('users.account_locked');
 

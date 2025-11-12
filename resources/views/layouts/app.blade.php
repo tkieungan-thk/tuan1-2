@@ -30,7 +30,7 @@
 
                             <ul class="navbar-right ml-auto list-inline float-right mb-0">
                                 <!-- language-->
-                                <li class="dropdown notification-list list-inline-item d-none d-md-inline-block">
+                                {{-- <li class="dropdown notification-list list-inline-item d-none d-md-inline-block">
                                     <a class="nav-link dropdown-toggle arrow-none waves-effect" data-toggle="dropdown"
                                         href="#" role="button" aria-haspopup="false" aria-expanded="false">
                                         <img src="assets/images/flags/us_flag.jpg" class="mr-2" height="12"
@@ -41,19 +41,39 @@
                                         class="dropdown-menu dropdown-menu-right dropdown-menu-animated language-switch">
                                         <a class="dropdown-item" href="#"><img
                                                 src="assets/images/flags/french_flag.jpg" alt=""
-                                                height="16" /><span> French </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/spain_flag.jpg" alt=""
-                                                height="16" /><span> Spanish </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/russia_flag.jpg" alt=""
-                                                height="16" /><span> Russian </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/germany_flag.jpg" alt=""
-                                                height="16" /><span> German </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/italy_flag.jpg" alt=""
-                                                height="16" /><span> Italian </span></a>
+                                                height="16" /><span> Vietnamese </span></a>
+                                    </div>
+                                </li> --}}
+                                <!-- language -->
+                                <li class="dropdown notification-list list-inline-item d-none d-md-inline-block">
+                                    <a class="nav-link dropdown-toggle arrow-none waves-effect" data-toggle="dropdown"
+                                        href="#" role="button" aria-haspopup="false" aria-expanded="false">
+
+                                        @if (App::getLocale() === 'vi')
+                                            <img src="{{ asset('assets/images/flags/vietnam_flag.jpg') }}"
+                                                class="mr-2" height="12" alt="" />
+                                            Vietnamese
+                                        @else
+                                            <img src="{{ asset('assets/images/flags/us_flag.jpg') }}" class="mr-2"
+                                                height="12" alt="" />
+                                            English
+                                        @endif
+
+                                        <span class="mdi mdi-chevron-down"></span>
+                                    </a>
+
+                                    <div
+                                        class="dropdown-menu dropdown-menu-right dropdown-menu-animated language-switch">
+                                        <a class="dropdown-item" href="{{ route('change.language', 'en') }}">
+                                            <img src="{{ asset('assets/images/flags/us_flag.jpg') }}" height="16"
+                                                alt="">
+                                            <span>English</span>
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('change.language', 'vi') }}">
+                                            <img src="{{ asset('assets/images/flags/vietnam_flag.jpg') }}"
+                                                height="16" alt="">
+                                            <span>Vietnamese</span>
+                                        </a>
                                     </div>
                                 </li>
 
@@ -81,12 +101,12 @@
                                             <!-- item-->
                                             <a class="dropdown-item" href="{{ route('password.edit') }}"><i
                                                     class="mdi mdi-account-circle"></i>
-                                                Profile</a>
+                                                {{ __('layout.profile') }}</a>
                                             <div class="dropdown-divider"></div>
                                             <form method="POST" action="{{ route('logout') }}">
                                                 @csrf
                                                 <button type="submit" class="dropdown-item text-danger">
-                                                    <i class="mdi mdi-power text-danger"></i> Logout
+                                                    <i class="mdi mdi-power text-danger"></i> {{ __('layout.logout') }}
                                                 </button>
                                             </form>
                                         </div>

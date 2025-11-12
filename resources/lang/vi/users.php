@@ -1,14 +1,18 @@
 <?php
 
 return [
-    'page_title'           => 'Người dùng',
-    'item1'                => 'Người dùng',
-    'item2'                => 'Danh sách',
-    'item_create'          => 'Create Users',
-    'item_update'          => 'Update Users',
-    'username'             => 'Tên',
-    'status'               => 'Trạng thái',
-    'actions'              => 'Hành động',
+    'page_title'  => 'Người dùng',
+    'item1'       => 'Người dùng',
+    'item2'       => 'Danh sách',
+    'item_create' => 'Tạo người dùng',
+    'item_update' => 'Cập nhật người dùng',
+    'username'    => 'Tên',
+    'status'      => 'Trạng thái',
+    'actions'     => 'Hành động',
+    'status_enum' => [
+        'active' => 'Hoạt động',
+        'locked' => 'Đã khóa',
+    ],
     'update_status'        => 'Cập nhật trạng thái thành công.',
     'btn_cancel'           => 'Hủy',
     'title_delete_user'    => 'Xóa người dùng',

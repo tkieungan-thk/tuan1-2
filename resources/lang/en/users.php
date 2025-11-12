@@ -9,6 +9,10 @@ return [
     'username' => 'Username',
     'status' => 'Status',
     'actions' => 'Actions',
+    'status_enum' => [
+        'active' => 'Active',
+        'locked' => 'Locked',
+    ],
     'update_status' => 'Status update successful.',
     'btn_cancel' => 'Cancel',
     'title_delete_user' => 'Delete Users',
