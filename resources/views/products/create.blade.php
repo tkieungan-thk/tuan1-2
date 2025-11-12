@@ -11,7 +11,8 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a>
+                        </li>
                         <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item_create') }}</a></li>
                     </ol>
                 </div>
@@ -82,19 +83,18 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 <div class="col-md-3 mb-3">
                                     <label for="status" class="form-label">{{ __('products.status') }}</label>
                                     <select name="status" id="status" class="form-control">
-                                        <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>
-                                            {{ __('products.status_active') }}</option>
-                                        <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>
-                                            {{ __('products.status_inactive') }}</option>
-                                        <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>
-                                            {{ __('products.status_draft') }}
-                                        </option>
+                                        @foreach (__('products.status_enum') as $value => $label)
+                                            <option value="{{ $value }}"
+                                                {{ old('status', 'active') == $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
+
                             </div>
 
                             <h5 class="mb-3 mt-4 text-primary">{{ __('products.images') }}</h5>

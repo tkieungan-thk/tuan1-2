@@ -11,7 +11,8 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a>
+                        </li>
                         <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item_update') }}</a></li>
                     </ol>
                 </div>
@@ -76,15 +77,12 @@
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">{{ __('products.status') }}</label>
                                     <select name="status" class="form-control">
-                                        <option value="active"
-                                            {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>{{ __('products.status_active') }}
-                                        </option>
-                                        <option value="inactive"
-                                            {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>{{ __('products.status_inactive') }}
-                                        </option>
-                                        <option value="draft"
-                                            {{ old('status', $product->status) == 'draft' ? 'selected' : '' }}>{{ __('products.status_draft') }}
-                                        </option>
+                                        @foreach (\App\Enums\ProductType::cases() as $status)
+                                            <option value="{{ $status->value }}"
+                                                {{ old('status', $product->status->value ?? $product->status) == $status->value ? 'selected' : '' }}>
+                                                {{ $status->label() }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -104,12 +102,14 @@
                                                     <input type="radio" name="existing_main_image"
                                                         value="{{ $image->id }}" class="form-check-input"
                                                         {{ $image->is_main ? 'checked' : '' }}>
-                                                    <label class="form-check-label small">{{ __('products.image_main') }}</label>
+                                                    <label
+                                                        class="form-check-label small">{{ __('products.image_main') }}</label>
                                                 </div>
                                                 <div class="form-check">
                                                     <input type="checkbox" name="delete_images[]"
                                                         value="{{ $image->id }}" class="form-check-input">
-                                                    <label class="form-check-label small text-danger">{{ __('products.delete_image') }}</label>
+                                                    <label
+                                                        class="form-check-label small text-danger">{{ __('products.delete_image') }}</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -143,14 +143,15 @@
                                                     class="form-control">
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">{{ __('products.attribute_value') }}</label>
+                                                <label class="form-label">{{ __('products.attribute_values') }}</label>
                                                 <input type="text" name="attributes[{{ $index }}][values]"
                                                     value="{{ old('attributes.' . $index . '.values', $attribute->values->pluck('value')->implode(', ')) }}"
                                                     class="form-control">
                                             </div>
                                         </div>
                                         <button type="button"
-                                            class="btn btn-link text-danger p-0 mt-2 remove-attribute">✕ {{ __('products.remove_attribute') }}</button>
+                                            class="btn btn-link text-danger p-0 mt-2 remove-attribute">✕
+                                            {{ __('products.remove_attribute') }}</button>
                                     </div>
                                 @empty
                                     <div class="border rounded p-3 mb-3 bg-light attribute-group">
@@ -160,7 +161,7 @@
                                                 <input type="text" name="attributes[0][name]" class="form-control">
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">{{ __('products.attribute_value') }}</label>
+                                                <label class="form-label">{{ __('products.attribute_values') }}</label>
                                                 <input type="text" name="attributes[0][values]" class="form-control">
                                             </div>
                                         </div>

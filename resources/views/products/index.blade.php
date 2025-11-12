@@ -9,7 +9,8 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('products.item1') }}</a>
+                        </li>
                         <li class="breadcrumb-item"><a href="javascript:void(0);">{{ __('products.item2') }}</a></li>
                     </ol>
                 </div>
@@ -41,9 +42,8 @@
             <div class="col-lg-12">
                 <div class="card m-b-30">
                     <div class="card-body">
-
                         <div class="mb-3">
-                            <form action="{{ route('products.index') }}" method="GET" class="form-inline row g-2">
+                            <form action="{{ route('products.index') }}" method="GET" class="align-items-center row g-2">
 
                                 <div class="col-md-3">
                                     <input type="text" name="search" value="{{ request('search') }}"
@@ -73,7 +73,7 @@
                                 </div>
 
                                 <div class="col-md-2 d-flex gap-1">
-                                    <button type="submit" class="btn btn-primary me-2">
+                                    <button type="submit" class="btn btn-primary me-2 mr-2">
                                         <i class="fa fa-search"></i> {{ __('products.filter') }}
                                     </button>
                                     <a href="{{ route('products.index') }}" class="btn btn-secondary">
@@ -84,7 +84,7 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table mb-0">
+                            <table class="table mb-0 table-hover">
                                 <thead class="thead-default">
                                     <tr>
                                         <th>#</th>
@@ -92,8 +92,7 @@
                                         <th>{{ __('products.category') }}</th>
                                         <th>{{ __('products.price') }}</th>
                                         <th>{{ __('products.stock') }}</th>
-                                        <th>{{ __('products.status') }}</th>
-                                        <th>{{ __('products.action') }}</th>
+                                        <th scope="col" colspan="2">{{ __('products.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -109,12 +108,24 @@
                                             <td>{{ $product->category->name ?? '—' }}</td>
                                             <td>{{ $product->formatted_price }}</td>
                                             <td>
-                                                <span class="{{ $product->stock > 0 ? 'text-success' : 'text-danger' }}">
-                                                    {{ $product->stock > 0 ? __('products.stock_1') : __('products.stock_0') }}
-                                                </span>
+                                                @if ($product->isOutOfStock())
+                                                    <span class="badge badge-danger">
+                                                        {{ $product->stockStatus->label() }}
+                                                    </span>
+                                                @elseif($product->isLowStock())
+                                                    <span class="badge badge-warning">
+                                                        {{ $product->getFormattedStockAttribute() }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-success">
+                                                        {{ $product->getFormattedStockAttribute() }}
+                                                    </span>
+                                                @endif
                                             </td>
-                                            <td>{{ $product->status == 'active' ? 'Active' : 'Inactive' }}</td>
-                                            <td>
+                                            <td><span class="badge badge-{{ $product->status->color() }}">
+                                                    {{ $product->status->label() }}
+                                                </span></td>
+                                            <td class="d-flex justify-content-end">
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('products.show', $product->id) }}"
                                                         class="btn btn-info mx-1"><i class="fa fa-eye"></i></a>
@@ -169,7 +180,8 @@
                     <form id="deleteModalForm" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger px-4">{{ __('products.btn_deleted_product') }}</button>
+                        <button type="submit"
+                            class="btn btn-danger px-4">{{ __('products.btn_deleted_product') }}</button>
                     </form>
                 </div>
             </div>
