@@ -170,17 +170,32 @@
             const addBtn = document.getElementById('add-attribute');
             let attrCount = 1;
 
+            let selectedFiles = [];
+
             imageInput.addEventListener('change', function() {
+                selectedFiles = Array.from(this.files);
+                renderPreviews();
+            });
+
+            function renderPreviews() {
                 imagePreview.innerHTML = '';
-                if (this.files.length > 0) {
+                if (selectedFiles.length > 0) {
                     imagePreview.classList.remove('d-none');
-                    Array.from(this.files).forEach(file => {
+                    selectedFiles.forEach((file, index) => {
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const col = document.createElement('div');
-                            col.className = 'col-md-3 mb-2 rounded mr-2';
-                            col.innerHTML =
-                                `<img src="${e.target.result}" class="img-fluid rounded border">`;
+                            col.className = 'col-md-3 position-relative mb-3';
+
+                            col.innerHTML = `
+                                <div class="border rounded overflow-hidden shadow-sm">
+                                    <img src="${e.target.result}" class="img-fluid" style="height:200px;object-fit:cover;">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
+                                        onclick="removeImage(${index})" title="Xóa ảnh">
+                                        &times;
+                                    </button>
+                                </div>
+                            `;
                             imagePreview.appendChild(col);
                         };
                         reader.readAsDataURL(file);
@@ -188,7 +203,41 @@
                 } else {
                     imagePreview.classList.add('d-none');
                 }
-            });
+                updateFileInput();
+            }
+
+            function removeImage(index) {
+                selectedFiles.splice(index, 1);
+                renderPreviews();
+            }
+
+            window.removeImage = removeImage;
+
+            function updateFileInput() {
+                const dataTransfer = new DataTransfer();
+                selectedFiles.forEach(file => dataTransfer.items.add(file));
+                imageInput.files = dataTransfer.files;
+            }
+
+            // imageInput.addEventListener('change', function() {
+            //     imagePreview.innerHTML = '';
+            //     if (this.files.length > 0) {
+            //         imagePreview.classList.remove('d-none');
+            //         Array.from(this.files).forEach(file => {
+            //             const reader = new FileReader();
+            //             reader.onload = function(e) {
+            //                 const col = document.createElement('div');
+            //                 col.className = 'col-md-3 mb-2 rounded mr-2';
+            //                 col.innerHTML =
+            //                     `<img src="${e.target.result}" class="img-fluid rounded border">`;
+            //                 imagePreview.appendChild(col);
+            //             };
+            //             reader.readAsDataURL(file);
+            //         });
+            //     } else {
+            //         imagePreview.classList.add('d-none');
+            //     }
+            // });
 
             addBtn.addEventListener('click', function() {
                 const newAttr = document.createElement('div');

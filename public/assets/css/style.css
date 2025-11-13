@@ -3650,3 +3650,26 @@ table.focus-on tbody tr.focused td {
   padding-left: 20px;
 }
 /*# sourceMappingURL=style.css.map */
+
+/* ảnh preview  */
+#preview_image {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* list ảnh*/
+.thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.thumb:hover {
+    transform: scale(1.05);
+    border-color: #0d6efd;
+}
+

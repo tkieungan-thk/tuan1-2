@@ -201,17 +201,32 @@
             const imageInput = document.getElementById('images');
             const imagePreview = document.getElementById('image-preview');
 
+            let selectedFiles = [];
+
             imageInput.addEventListener('change', function() {
+                selectedFiles = Array.from(this.files);
+                renderPreviews();
+            });
+
+            function renderPreviews() {
                 imagePreview.innerHTML = '';
-                if (this.files.length > 0) {
+                if (selectedFiles.length > 0) {
                     imagePreview.classList.remove('d-none');
-                    Array.from(this.files).forEach(file => {
+                    selectedFiles.forEach((file, index) => {
                         const reader = new FileReader();
-                        reader.onload = e => {
+                        reader.onload = function(e) {
                             const col = document.createElement('div');
-                            col.className = 'col-md-3';
-                            col.innerHTML =
-                                `<img src="${e.target.result}" class="img-fluid rounded border" style="height:140px; object-fit:cover;">`;
+                            col.className = 'col-md-3 position-relative mb-3';
+
+                            col.innerHTML = `
+                                <div class="border rounded overflow-hidden shadow-sm">
+                                    <img src="${e.target.result}" class="img-fluid" style="height:200px;object-fit:cover;">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
+                                        onclick="removeImage(${index})" title="Xóa ảnh">
+                                        &times;
+                                    </button>
+                                </div>
+                            `;
                             imagePreview.appendChild(col);
                         };
                         reader.readAsDataURL(file);
@@ -219,7 +234,21 @@
                 } else {
                     imagePreview.classList.add('d-none');
                 }
-            });
+                updateFileInput();
+            }
+
+            function removeImage(index) {
+                selectedFiles.splice(index, 1);
+                renderPreviews();
+            }
+
+            window.removeImage = removeImage;
+
+            function updateFileInput() {
+                const dataTransfer = new DataTransfer();
+                selectedFiles.forEach(file => dataTransfer.items.add(file));
+                imageInput.files = dataTransfer.files;
+            }
 
             let attributeCount = {{ $product->attributes->count() }};
             const container = document.getElementById('attributes-container');
@@ -227,18 +256,18 @@
                 const div = document.createElement('div');
                 div.className = 'border rounded p-3 mb-3 bg-light attribute-group';
                 div.innerHTML = `
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">{{ __('products.attribute_name') }}</label>
-                    <input type="text" name="attributes[${attributeCount}][name]" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">{{ __('products.attribute_values') }}</label>
-                    <input type="text" name="attributes[${attributeCount}][values]" class="form-control">
-                </div>
-            </div>
-            <button type="button" class="btn btn-link text-danger p-0 mt-2 remove-attribute">✕ {{ __('products.remove_attribute') }}</button>
-        `;
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ __('products.attribute_name') }}</label>
+                            <input type="text" name="attributes[${attributeCount}][name]" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ __('products.attribute_values') }}</label>
+                            <input type="text" name="attributes[${attributeCount}][values]" class="form-control">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-link text-danger p-0 mt-2 remove-attribute">✕ {{ __('products.remove_attribute') }}</button>
+                `;
                 container.appendChild(div);
                 attributeCount++;
             });

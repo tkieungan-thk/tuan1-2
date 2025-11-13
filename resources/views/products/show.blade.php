@@ -47,10 +47,15 @@
                         <div class="row">
                             <div class="col-md-6">
                                 @if ($product->mainImage)
-                                    <div class="mb-3 text-center">
-                                        <img src="{{ asset('storage/' . $product->mainImage->image_path) }}"
-                                            alt="{{ $product->name }}" class="img-fluid rounded border shadow-sm">
-                                    </div>
+                                    <img id="preview_image" src="{{ asset('storage/' . $product->mainImage->image_path) }}"
+                                        alt="{{ $product->name }}" class="img-fluid rounded border shadow-sm">
+                                @elseif ($product->images->isNotEmpty())
+                                    <img id="preview_image"
+                                        src="{{ asset('storage/' . $product->images->first()->image_path) }}"
+                                        alt="{{ $product->name }}" class="img-fluid rounded border shadow-sm">
+                                @else
+                                    <img id="preview_image" src="" alt="No image available"
+                                        class="img-fluid rounded border shadow-sm opacity-75">
                                 @endif
 
                                 @if ($product->images->count() > 1)
@@ -58,7 +63,7 @@
                                         @foreach ($product->images as $image)
                                             <img src="{{ asset('storage/' . $image->image_path) }}"
                                                 alt="{{ $product->name }}"
-                                                class="rounded border {{ $image->is_main ? 'border-primary' : 'border-secondary' }}"
+                                                class="thumb rounded border {{ $image->is_main ? 'border-primary' : 'border-secondary' }}"
                                                 style="width:80px; height:80px; object-fit:cover;">
                                         @endforeach
                                     </div>
@@ -106,4 +111,21 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainImage = document.getElementById('preview_image');
+            const thumbnails = document.querySelectorAll('.thumb');
+
+            thumbnails.forEach(img => {
+                img.addEventListener('click', function() {
+                    mainImage.src = this.src;
+
+                    thumbnails.forEach(t => t.classList.remove('border-primary'));
+                    thumbnails.forEach(t => t.classList.add('border-secondary'));
+                    this.classList.remove('border-secondary');
+                    this.classList.add('border-primary');
+                });
+            });
+        });
+    </script>
 @endsection

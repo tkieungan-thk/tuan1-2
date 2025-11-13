@@ -29,8 +29,7 @@ class ProductController extends Controller
             ->filter($safe)
             ->with(['category', 'images', 'attributes.values'])
             ->latest('id')
-            ->paginate(Product::PAGINATION_PER_PAGE)
-            ->withQueryString();
+            ->get();
 
         $categories = Category::all();
 
@@ -38,7 +37,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Hiển thị chi tiết sản phẩm theo ID.
+     * Hiển thị chi tiết sản phẩm.
      *
      * @param  Product $product
      * @return View
@@ -63,7 +62,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Lưu sản phẩm vào database.
+     * Xử lý lưu sản phẩm.
      *
      * @param  ProductRequest  $request
      * @return RedirectResponse
@@ -74,12 +73,12 @@ class ProductController extends Controller
 
         try {
             $product = Product::create([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
-                'price'       => $request->price,
-                'stock'       => $request->stock,
-                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
             if ($request->hasFile('images')) {
@@ -87,7 +86,7 @@ class ProductController extends Controller
             }
 
             if ($request->has('attributes')) {
-                $this->processProductAttributes($product, $request->input('attributes'));
+                $this->processProductAttributes($product, $request->input('attributes'), false);
             }
 
             DB::commit();
@@ -99,64 +98,6 @@ class ProductController extends Controller
 
             return back()->withInput()
                 ->with('error', __('products.created_error') . $e->getMessage());
-        }
-    }
-
-    /**
-     * Xử lý upload và lưu hình ảnh sản phẩm.
-     *
-     * @param  Product  $product
-     * @param  array<int, \Illuminate\Http\UploadedFile>  $images
-     * @param  int|null  $mainImageIndex
-     * @return void
-     */
-    private function processProductImages(Product $product, array $images, ?int $mainImageIndex = null): void
-    {
-        foreach ($images as $index => $image) {
-            if ($image->isValid()) {
-                $path = $image->store(Product::IMAGE_STORAGE_PATH, Product::IMAGE_DISK);
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image_path' => $path,
-                    'is_main'    => $index === $mainImageIndex,
-                ]);
-            }
-        }
-
-        if (is_null($mainImageIndex) && $product->images()->count() > 0) {
-            $product->images()->first()->update(['is_main' => true]);
-        }
-    }
-
-    /**
-     * Xử lý lưu attributes và values.
-     *
-     * @param  Product  $product
-     * @param  array<int, array{name: string, values: array<int,string>|string}>  $attributes
-     * @return void
-     */
-    private function processProductAttributes(Product $product, array $attributes): void
-    {
-        foreach ($attributes as $attributeData) {
-            if (! empty($attributeData['name']) && ! empty($attributeData['values'])) {
-                $attribute = Attribute::create([
-                    'name'       => $attributeData['name'],
-                    'product_id' => $product->id,
-                ]);
-
-                $values = is_array($attributeData['values'])
-                    ? $attributeData['values']
-                    : explode(',', $attributeData['values']);
-
-                foreach ($values as $value) {
-                    if (! empty(trim($value))) {
-                        AttributeValue::create([
-                            'attribute_id' => $attribute->id,
-                            'value'        => trim($value),
-                        ]);
-                    }
-                }
-            }
         }
     }
 
@@ -187,24 +128,27 @@ class ProductController extends Controller
 
         try {
             $product->fill([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
-                'price'       => $request->price,
-                'stock'       => $request->stock,
-                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
-            $hasChanges = false;
+            $hasChanges = $product->isDirty();
 
-            if ($product->isDirty()) {
+            if ($hasChanges) {
                 $product->save();
-                $hasChanges = true;
             }
 
             $imageChanges = $this->handleImageUpdates($product, $request);
 
-            $attributeChanges = $this->handleAttributeUpdates($product, $request);
+            $attributeChanges = false;
+            if ($request->has('attributes')) {
+                $this->processProductAttributes($product, $request->input('attributes'), true);
+                $attributeChanges = true;
+            }
 
             if ($hasChanges || $imageChanges || $attributeChanges) {
                 DB::commit();
@@ -226,6 +170,138 @@ class ProductController extends Controller
     }
 
     /**
+     * Xóa sản phẩm cùng ảnh và thuộc tính liên quan.
+     *
+     * @param  int  $id
+     * @return RedirectResponse
+     */
+    public function destroy(Product $product): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $product->load(['images']);
+            $this->deleteAllProductImages($product);
+            $product->delete();
+
+            DB::commit();
+
+            return redirect()->route('products.index')
+                ->with('success', __('products.deleted_success'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', __('products.deleted_error') . $e->getMessage());
+        }
+    }
+
+    /**
+     * Xử lý upload và lưu hình ảnh sản phẩm.
+     *
+     * @param  Product  $product
+     * @param  array<int, \Illuminate\Http\UploadedFile>  $images
+     * @param  int|null  $mainImageIndex
+     * @return void
+     */
+    private function processProductImages(Product $product, array $images, ?int $mainImageIndex = null): void
+    {
+        foreach ($images as $index => $image) {
+            if ($image->isValid()) {
+                $path = $image->store(Product::IMAGE_STORAGE_PATH, Product::IMAGE_DISK);
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => $path,
+                    'is_main' => $index === $mainImageIndex,
+                ]);
+            }
+        }
+
+        if (is_null($mainImageIndex) && $product->images()->count() > 0) {
+            $product->images()->first()->update(['is_main' => true]);
+        }
+    }
+
+    /**
+     * Xử lý lưu attributes và values.
+     *
+     * @param  Product  $product
+     * @param  array<int, array{name: string, values: array<int,string>|string}>  $attributes
+     * @return void
+     */
+    private function processProductAttributes(Product $product, array $attributes, bool $isUpdate = false): void
+    {
+        $existingAttributeIds = [];
+
+        foreach ($attributes as $attributeData) {
+            if (empty($attributeData['name']) || empty($attributeData['values'])) {
+                continue;
+            }
+
+            $attribute = Attribute::updateOrCreate(
+                [
+                    'id' => $isUpdate ? ($attributeData['id'] ?? null) : null,
+                    'product_id' => $product->id,
+                ],
+                [
+                    'name' => trim($attributeData['name']),
+                ]
+            );
+
+            $existingAttributeIds[] = $attribute->id;
+
+            $values = $this->parseAttributeValues($attributeData['values']);
+            $this->syncAttributeValues($attribute, $values);
+        }
+
+        if ($isUpdate && !empty($existingAttributeIds)) {
+            Attribute::where('product_id', $product->id)
+                ->whereNotIn('id', $existingAttributeIds)
+                ->delete();
+        }
+    }
+
+    /**
+     * Đồng bộ values cho attribute
+     *
+     * @param Attribute
+     * @param array
+     */
+    private function syncAttributeValues(Attribute $attribute, array $newValues): void
+    {
+        $normalizedValues = array_unique(array_map('trim', $newValues));
+
+        $attribute->values()->delete();
+
+        foreach ($normalizedValues as $value) {
+            if (!empty($value)) {
+                AttributeValue::create([
+                    'attribute_id' => $attribute->id,
+                    'value' => $value,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Parse values
+     *
+     * @param $values
+     * @param array
+     */
+    private function parseAttributeValues(mixed $values): array
+    {
+        if (is_array($values)) {
+            return $values;
+        }
+
+        if (is_string($values)) {
+            return array_map('trim', explode(',', $values));
+        }
+
+        return [];
+    }
+
+    /**
      * Xử lý cập nhật ảnh khi cập nhật sản phẩm
      *
      * @param  ProductRequest  $request
@@ -237,11 +313,7 @@ class ProductController extends Controller
         $hasImageChanges = false;
 
         if ($request->hasFile('images')) {
-            $this->processProductImages(
-                $product,
-                $request->file('images'),
-                $request->main_image_index
-            );
+            $this->processProductImages($product, $request->file('images'), $request->main_image_index);
             $hasImageChanges = true;
         }
 
@@ -302,7 +374,7 @@ class ProductController extends Controller
 
         $imagePaths = $imagesToDelete->pluck('image_path')->filter()->toArray();
 
-        if (! empty($imagePaths)) {
+        if (!empty($imagePaths)) {
             Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
         }
 
@@ -315,125 +387,6 @@ class ProductController extends Controller
         }
 
         return true;
-    }
-
-    /**
-     * Xử lý khi thuộc tính có thay đổi
-     *
-     * @param  Product  $product
-     * @param  array<int, array{id?: int, name: string, values: array<int,string>|string}>  $newAttributes
-     * @return void
-     */
-    private function handleAttributeUpdates(Product $product, ProductRequest $request): bool
-    {
-        $attributes = $request->input('attributes', []);
-        
-        if (empty($attributes) || collect($attributes)->filter()->isEmpty()) {
-            return false;
-        }
-
-        $this->syncProductAttributes($product, $attributes);
-
-        return true;
-    }
-
-    /**
-     * Đồng bộ attributes của sản phẩm
-     *
-     */
-    private function syncProductAttributes(Product $product, array $newAttributes): void
-    {
-        $existingAttributeIds = [];
-
-        foreach ($newAttributes as $attributeData) {
-            if (empty($attributeData['name']) || empty($attributeData['values'])) {
-                continue;
-            }
-
-            $attribute = Attribute::updateOrCreate(
-                [
-                    'id'         => $attributeData['id'] ?? null,
-                    'product_id' => $product->id,
-                ],
-                [
-                    'name' => trim($attributeData['name']),
-                ]
-            );
-
-            $existingAttributeIds[] = $attribute->id;
-
-            $values = $this->parseAttributeValues($attributeData['values']);
-            $this->syncAttributeValues($attribute, $values);
-        }
-
-        if (! empty($existingAttributeIds)) {
-            Attribute::where('product_id', $product->id)
-                ->whereNotIn('id', $existingAttributeIds)
-                ->delete();
-        }
-    }
-
-    /**
-     * Đồng bộ values cho attribute
-     */
-    private function syncAttributeValues(Attribute $attribute, array $newValues): void
-    {
-        $normalizedValues = array_unique(array_map('trim', $newValues));
-
-        $attribute->values()->delete();
-
-        foreach ($normalizedValues as $value) {
-            if (! empty($value)) {
-                AttributeValue::create([
-                    'attribute_id' => $attribute->id,
-                    'value'        => $value,
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Parse values
-     */
-    private function parseAttributeValues(mixed $values): array
-    {
-        if (is_array($values)) {
-            return $values;
-        }
-
-        if (is_string($values)) {
-            return array_map('trim', explode(',', $values));
-        }
-
-        return [];
-    }
-
-    /**
-     * Xóa sản phẩm cùng ảnh và thuộc tính liên quan.
-     *
-     * @param  int  $id
-     * @return RedirectResponse
-     */
-    public function destroy(Product $product): RedirectResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            $product->load(['images']);
-
-            $this->deleteAllProductImages($product);
-
-            $product->delete();
-
-            DB::commit();
-
-            return redirect()->route('products.index')
-                ->with('success', __('products.deleted_success'));
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()->with('error', __('products.deleted_error') . $e->getMessage());
-        }
     }
 
     /**
@@ -450,7 +403,7 @@ class ProductController extends Controller
 
         $imagePaths = $product->images->pluck('image_path')->filter()->toArray();
 
-        if (! empty($imagePaths)) {
+        if (!empty($imagePaths)) {
             Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
         }
 
