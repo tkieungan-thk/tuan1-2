@@ -19,6 +19,14 @@
 
         <div class="row mb-3">
             <div class="col-12 d-flex justify-content-end">
+                <a href="{{ route('products.export') }}" class="btn btn-success">
+                    <i class="fa fa-download"></i> Export Excel
+                </a>
+
+                {{-- Nút Import --}}
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#importModal">
+                    <i class="fa fa-upload"></i> Import Excel
+                </button>
                 <a href="{{ route('products.create') }}" class="btn btn-primary">
                     <i class="fa fa-plus"></i>
                 </a>
@@ -184,6 +192,39 @@
                             class="btn btn-danger px-4">{{ __('products.btn_deleted_product') }}</button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import sản phẩm từ Excel</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="file">Chọn file Excel</label>
+                            <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                            <small class="form-text text-muted">
+                                Định dạng hỗ trợ: .xlsx, .xls, .csv (Tối đa 10MB)
+                            </small>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ route('products.import.template') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fa fa-download"></i> Tải template
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

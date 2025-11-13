@@ -12,6 +12,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -74,12 +79,12 @@ class ProductController extends Controller
 
         try {
             $product = Product::create([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
-                'price'       => $request->price,
-                'stock'       => $request->stock,
-                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
             if ($request->hasFile('images')) {
@@ -118,7 +123,7 @@ class ProductController extends Controller
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
-                    'is_main'    => $index === $mainImageIndex,
+                    'is_main' => $index === $mainImageIndex,
                 ]);
             }
         }
@@ -138,9 +143,9 @@ class ProductController extends Controller
     private function processProductAttributes(Product $product, array $attributes): void
     {
         foreach ($attributes as $attributeData) {
-            if (! empty($attributeData['name']) && ! empty($attributeData['values'])) {
+            if (!empty($attributeData['name']) && !empty($attributeData['values'])) {
                 $attribute = Attribute::create([
-                    'name'       => $attributeData['name'],
+                    'name' => $attributeData['name'],
                     'product_id' => $product->id,
                 ]);
 
@@ -149,10 +154,10 @@ class ProductController extends Controller
                     : explode(',', $attributeData['values']);
 
                 foreach ($values as $value) {
-                    if (! empty(trim($value))) {
+                    if (!empty(trim($value))) {
                         AttributeValue::create([
                             'attribute_id' => $attribute->id,
-                            'value'        => trim($value),
+                            'value' => trim($value),
                         ]);
                     }
                 }
@@ -187,12 +192,12 @@ class ProductController extends Controller
 
         try {
             $product->fill([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
-                'price'       => $request->price,
-                'stock'       => $request->stock,
-                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
             $hasChanges = false;
@@ -302,7 +307,7 @@ class ProductController extends Controller
 
         $imagePaths = $imagesToDelete->pluck('image_path')->filter()->toArray();
 
-        if (! empty($imagePaths)) {
+        if (!empty($imagePaths)) {
             Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
         }
 
@@ -327,7 +332,7 @@ class ProductController extends Controller
     private function handleAttributeUpdates(Product $product, ProductRequest $request): bool
     {
         $attributes = $request->input('attributes', []);
-        
+
         if (empty($attributes) || collect($attributes)->filter()->isEmpty()) {
             return false;
         }
@@ -352,7 +357,7 @@ class ProductController extends Controller
 
             $attribute = Attribute::updateOrCreate(
                 [
-                    'id'         => $attributeData['id'] ?? null,
+                    'id' => $attributeData['id'] ?? null,
                     'product_id' => $product->id,
                 ],
                 [
@@ -366,7 +371,7 @@ class ProductController extends Controller
             $this->syncAttributeValues($attribute, $values);
         }
 
-        if (! empty($existingAttributeIds)) {
+        if (!empty($existingAttributeIds)) {
             Attribute::where('product_id', $product->id)
                 ->whereNotIn('id', $existingAttributeIds)
                 ->delete();
@@ -383,10 +388,10 @@ class ProductController extends Controller
         $attribute->values()->delete();
 
         foreach ($normalizedValues as $value) {
-            if (! empty($value)) {
+            if (!empty($value)) {
                 AttributeValue::create([
                     'attribute_id' => $attribute->id,
-                    'value'        => $value,
+                    'value' => $value,
                 ]);
             }
         }
@@ -450,10 +455,128 @@ class ProductController extends Controller
 
         $imagePaths = $product->images->pluck('image_path')->filter()->toArray();
 
-        if (! empty($imagePaths)) {
+        if (!empty($imagePaths)) {
             Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
         }
 
         $product->images()->delete();
+    }
+
+    //============= IM/EX
+    public function export(): BinaryFileResponse
+    {
+        $fileName = 'products_' . date('Y_m_d_His') . '.xlsx';
+
+        return Excel::download(new ProductsExport, $fileName);
+    }
+
+    /**
+     * Import sản phẩm từ Excel
+     */
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240' // 10MB max
+        ]);
+
+        try {
+            $import = new ProductsImport;
+
+            Excel::import($import, $request->file('file'));
+
+            $successCount = $import->getSuccessCount();
+            $errors = $import->getErrors();
+
+            $message = "Import thành công {$successCount} sản phẩm.";
+
+            if (!empty($errors)) {
+                $message .= " Có " . count($errors) . " lỗi: " . implode('; ', array_slice($errors, 0, 5));
+
+                if (count($errors) > 5) {
+                    $message .= "... và " . (count($errors) - 5) . " lỗi khác.";
+                }
+            }
+
+            $type = empty($errors) ? 'success' : 'warning';
+
+            return redirect()->route('products.index')
+                ->with($type, $message);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import thất bại: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template import
+     */
+    public function downloadTemplate(): BinaryFileResponse
+    {
+        $templatePath = storage_path('app/templates/product_import_template.xlsx');
+
+        // Tạo template nếu chưa có
+        if (!file_exists($templatePath)) {
+            $this->createImportTemplate();
+        }
+
+        return response()->download($templatePath, 'product_import_template.xlsx');
+    }
+
+    /**
+     * Tạo template import
+     */
+    private function createImportTemplate(): void
+    {
+        $headers = [
+            'Tên sản phẩm',
+            'Danh mục',
+            'Mô tả',
+            'Giá (VND)',
+            'Tồn kho',
+            'Trạng thái',
+            'Thuộc tính'
+        ];
+
+        $examples = [
+            [
+                'iPhone 15 Pro',
+                'Điện thoại',
+                'iPhone 15 Pro 128GB',
+                '25.000.000',
+                '50',
+                'Hoạt động',
+                'Màu sắc: Xanh, Đen; Bộ nhớ: 128GB, 256GB'
+            ],
+            [
+                'Samsung Galaxy S24',
+                'Điện thoại',
+                'Samsung Galaxy S24 Ultra',
+                '22.000.000',
+                '30',
+                'Hoạt động',
+                'Màu sắc: Trắng, Tím; Bộ nhớ: 256GB, 512GB'
+            ]
+        ];
+
+        $export = new class ($headers, $examples) implements FromArray {
+            private $headers;
+            private $examples;
+
+            public function __construct($headers, $examples)
+            {
+                $this->headers = $headers;
+                $this->examples = $examples;
+            }
+
+            public function array(): array
+            {
+                return [
+                    $this->headers,
+                    ...$this->examples
+                ];
+            }
+        };
+
+        Excel::store($export, 'templates/product_import_template.xlsx');
     }
 }

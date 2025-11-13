@@ -37,3 +37,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('products', ProductController::class);
+Route::get('/export', [ProductController::class, 'export'])->name('products.export');
+Route::post('/import', [ProductController::class, 'import'])->name('products.import');
+Route::get('/import-template', [ProductController::class, 'downloadTemplate'])->name('products.import.template');
