@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
 use App\Http\Requests\ProductRequest;
+use App\Imports\ProductsImport;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use App\Exports\ProductsExport;
-use App\Imports\ProductsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Illuminate\Http\Request;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Excel as ExcelFormat;
 
 class ProductController extends Controller
 {
@@ -462,12 +464,12 @@ class ProductController extends Controller
         $product->images()->delete();
     }
 
-    //============= IM/EX
+    // ============= IM/EX
     public function export(): BinaryFileResponse
     {
         $fileName = 'products_' . date('Y_m_d_His') . '.xlsx';
 
-        return Excel::download(new ProductsExport, $fileName);
+        return Excel::download(new ProductsExport(), $fileName);
     }
 
     /**
@@ -476,11 +478,11 @@ class ProductController extends Controller
     public function import(Request $request): RedirectResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240' // 10MB max
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // 10MB max
         ]);
 
         try {
-            $import = new ProductsImport;
+            $import = new ProductsImport();
 
             Excel::import($import, $request->file('file'));
 
@@ -490,10 +492,10 @@ class ProductController extends Controller
             $message = "Import thành công {$successCount} sản phẩm.";
 
             if (!empty($errors)) {
-                $message .= " Có " . count($errors) . " lỗi: " . implode('; ', array_slice($errors, 0, 5));
+                $message .= ' Có ' . count($errors) . ' lỗi: ' . implode('; ', array_slice($errors, 0, 5));
 
                 if (count($errors) > 5) {
-                    $message .= "... và " . (count($errors) - 5) . " lỗi khác.";
+                    $message .= '... và ' . (count($errors) - 5) . ' lỗi khác.';
                 }
             }
 
@@ -501,7 +503,6 @@ class ProductController extends Controller
 
             return redirect()->route('products.index')
                 ->with($type, $message);
-
         } catch (\Exception $e) {
             return back()->with('error', 'Import thất bại: ' . $e->getMessage());
         }
@@ -514,7 +515,6 @@ class ProductController extends Controller
     {
         $templatePath = storage_path('app/templates/product_import_template.xlsx');
 
-        // Tạo template nếu chưa có
         if (!file_exists($templatePath)) {
             $this->createImportTemplate();
         }
@@ -534,7 +534,7 @@ class ProductController extends Controller
             'Giá (VND)',
             'Tồn kho',
             'Trạng thái',
-            'Thuộc tính'
+            'Thuộc tính',
         ];
 
         $examples = [
@@ -545,7 +545,7 @@ class ProductController extends Controller
                 '25.000.000',
                 '50',
                 'Hoạt động',
-                'Màu sắc: Xanh, Đen; Bộ nhớ: 128GB, 256GB'
+                'Màu sắc: Xanh, Đen; Bộ nhớ: 128GB, 256GB',
             ],
             [
                 'Samsung Galaxy S24',
@@ -554,12 +554,13 @@ class ProductController extends Controller
                 '22.000.000',
                 '30',
                 'Hoạt động',
-                'Màu sắc: Trắng, Tím; Bộ nhớ: 256GB, 512GB'
-            ]
+                'Màu sắc: Trắng, Tím; Bộ nhớ: 256GB, 512GB',
+            ],
         ];
 
         $export = new class ($headers, $examples) implements FromArray {
             private $headers;
+
             private $examples;
 
             public function __construct($headers, $examples)
@@ -572,11 +573,13 @@ class ProductController extends Controller
             {
                 return [
                     $this->headers,
-                    ...$this->examples
+                    ...$this->examples,
                 ];
             }
         };
 
-        Excel::store($export, 'templates/product_import_template.xlsx');
+        Storage::makeDirectory('templates');
+        //Excel::store($export, 'templates/product_import_template.xlsx');
+        Excel::store($export, 'templates/product_import_template.xlsx', null, ExcelFormat::XLSX);
     }
 }

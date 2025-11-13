@@ -2,18 +2,17 @@
 
 namespace App\Imports;
 
-use App\Models\Product;
-use App\Models\Category;
+use App\Enums\ProductType;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
-use App\Enums\ProductStatus;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Validation\Rule;
 
 class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
 {
@@ -36,29 +35,26 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
 
         try {
             foreach ($rows as $index => $row) {
-                // Bỏ qua dòng trống
                 if ($this->isEmptyRow($row)) {
                     continue;
                 }
 
-                $rowNumber = $index + 2; // +2 vì có header và index bắt đầu từ 0
+                $rowNumber = $index + 2;
 
                 try {
-                    // Validate dòng dữ liệu
                     $validator = Validator::make($row->toArray(), $this->rules());
-                    
+
                     if ($validator->fails()) {
                         $this->errors[] = "Dòng {$rowNumber}: " . implode(', ', $validator->errors()->all());
+
                         continue;
                     }
 
-                    // Tìm hoặc tạo category
                     $category = Category::firstOrCreate(
                         ['name' => trim($row['danh_muc'])],
                         ['name' => trim($row['danh_muc'])]
                     );
 
-                    // Tạo sản phẩm
                     $product = Product::create([
                         'name' => $row['ten_san_pham'],
                         'category_id' => $category->id,
@@ -68,23 +64,20 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
                         'status' => $this->parseStatus($row['trang_thai']),
                     ]);
 
-                    // Xử lý thuộc tính nếu có
                     if (!empty($row['thuoc_tinh'])) {
                         $this->processAttributes($product, $row['thuoc_tinh']);
                     }
 
                     $this->successCount++;
-
                 } catch (\Exception $e) {
                     $this->errors[] = "Dòng {$rowNumber}: " . $e->getMessage();
                 }
             }
 
             DB::commit();
-
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->errors[] = "Lỗi hệ thống: " . $e->getMessage();
+            $this->errors[] = 'Lỗi hệ thống: ' . $e->getMessage();
         }
     }
 
@@ -103,8 +96,8 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
      */
     private function parsePrice(string $price): float
     {
-        // Xóa ký tự VND, dấu chấm, dấu phẩy
         $cleaned = preg_replace('/[^\d]/', '', $price);
+
         return floatval($cleaned);
     }
 
@@ -114,16 +107,17 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
     private function parseStatus(string $status): string
     {
         $statusMap = [
-            'hoạt động' => ProductStatus::ACTIVE->value,
-            'active' => ProductStatus::ACTIVE->value,
-            'không hoạt động' => ProductStatus::INACTIVE->value,
-            'inactive' => ProductStatus::INACTIVE->value,
-            'nháp' => ProductStatus::DRAFT->value,
-            'draft' => ProductStatus::DRAFT->value,
+            'hoạt động' => ProductType::ACTIVE->value,
+            'active' => ProductType::ACTIVE->value,
+            'không hoạt động' => ProductType::INACTIVE->value,
+            'inactive' => ProductType::INACTIVE->value,
+            'nháp' => ProductType::DRAFT->value,
+            'draft' => ProductType::DRAFT->value,
         ];
 
         $lowerStatus = strtolower(trim($status));
-        return $statusMap[$lowerStatus] ?? ProductStatus::DRAFT->value;
+
+        return $statusMap[$lowerStatus] ?? ProductType::DRAFT->value;
     }
 
     /**
@@ -135,7 +129,7 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation
 
         foreach ($attributes as $attribute) {
             $parts = explode(':', $attribute, 2);
-            
+
             if (count($parts) === 2) {
                 $name = trim($parts[0]);
                 $values = array_map('trim', explode(',', $parts[1]));

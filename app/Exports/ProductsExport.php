@@ -3,15 +3,14 @@
 namespace App\Exports;
 
 use App\Models\Product;
-use App\Enums\ProductStatus;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ProductsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
+class ProductsExport implements FromCollection, WithColumnWidths, WithHeadings, WithMapping, WithStyles
 {
     /**
      * Lấy dữ liệu sản phẩm để export
@@ -85,12 +84,10 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function styles(Worksheet $sheet)
     {
         return [
-            // Style cho header
             1 => [
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '2D5F8B']]
+                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '2D5F8B']],
             ],
-            // Style cho dữ liệu
             'A' => ['alignment' => ['horizontal' => 'left']],
             'D' => ['alignment' => ['wrapText' => true]],
         ];
