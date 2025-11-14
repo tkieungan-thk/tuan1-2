@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\UserStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class UserRequest extends FormRequest
 {
@@ -24,29 +25,61 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         if ($this->isMethod('GET')) {
-            return [
-                'keyword'  => ['nullable', 'string', 'max:255'],
-                'status'   => ['nullable', 'in:' . implode(',', array_column(UserStatus::cases(), 'value'))],
-                'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
-            ];
+            return $this->getRulesForGet();
         }
-        $isUpdate = $this->route('user') !== null;
-        $userId   = $this->route('user')?->id;
+
+        if ($this->isMethod('POST')) {
+            return $this->getRulesForCreate();
+        }
+
+        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
+            return $this->getRulesForUpdate();
+        }
+
+        return [];
+    }
+
+    /**
+     * Trả về validate khi lọc, tìm kiếm người dùng.
+     *
+     * @return array{keyword: string[], per_page: string[], status: array<Enum|string>}
+     */
+    private function getRulesForGet(): array
+    {
+        return [
+            'keyword'  => ['nullable', 'string', 'max:255'],
+            'status'   => ['nullable', new Enum(UserStatus::class)],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+        ];
+    }
+
+    /**
+     * Trả về validate khi tạo mới người dùng.
+     *
+     * @return array{email: array<string|\Illuminate\Validation\Rules\Unique>, name: string[], password: string[]}
+     */
+    private function getRulesForCreate(): array
+    {
+        return [
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', Rule::unique('users', 'email')],
+            'password' => ['required', 'confirmed', 'min:6'],
+        ];
+    }
+
+    /**
+     * Trả về validate khi cập nhật người dùng
+     *
+     * @return array{email: array<string|\Illuminate\Validation\Rules\Unique>, name: string[], password: string[]}
+     */
+    private function getRulesForUpdate(): array
+    {
+        $userId = $this->route('user')?->id;
 
         return [
-            'name'  => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'email',
-                $isUpdate
-                    ? Rule::unique('users', 'email')->ignore($userId)
-                    : Rule::unique('users', 'email'),
-            ],
-            'password' => [
-                $isUpdate ? 'nullable' : 'required',
-                'confirmed',
-                'min:6',
-            ],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'password' => ['nullable', 'confirmed', 'min:6'],
         ];
     }
 }

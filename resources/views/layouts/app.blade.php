@@ -1,3 +1,10 @@
+@php
+    use App\Enums\Locale;
+
+    $locales = Locale::cases();
+    $current = App::getLocale();
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,38 +36,21 @@
                             </ul>
 
                             <ul class="navbar-right ml-auto list-inline float-right mb-0">
-                                <!-- language-->
-                                {{-- <li class="dropdown notification-list list-inline-item d-none d-md-inline-block">
-                                    <a class="nav-link dropdown-toggle arrow-none waves-effect" data-toggle="dropdown"
-                                        href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                                        <img src="assets/images/flags/us_flag.jpg" class="mr-2" height="12"
-                                            alt="" />
-                                        English <span class="mdi mdi-chevron-down"></span>
-                                    </a>
-                                    <div
-                                        class="dropdown-menu dropdown-menu-right dropdown-menu-animated language-switch">
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/french_flag.jpg" alt=""
-                                                height="16" /><span> Vietnamese </span></a>
-                                    </div>
-                                </li> --}}
                                 <!-- language -->
                                 <li class="dropdown notification-list list-inline-item d-none d-md-inline-block">
-                                    <a class="nav-link dropdown-toggle arrow-none waves-effect" data-toggle="dropdown"
-                                        href="#" role="button" aria-haspopup="false" aria-expanded="false">
-
-                                        @if (App::getLocale() === 'vi')
-                                            <img src="{{ asset('assets/images/flags/vietnam_flag.jpg') }}"
-                                                class="mr-2" height="12" alt="" />
-                                            Vietnamese
-                                        @else
-                                            <img src="{{ asset('assets/images/flags/us_flag.jpg') }}" class="mr-2"
-                                                height="12" alt="" />
-                                            English
-                                        @endif
-
-                                        <span class="mdi mdi-chevron-down"></span>
+                                    <a class="nav-link dropdown-toggle waves-effect" href="#"
+                                        data-toggle="dropdown">
+                                        {{ strtoupper($current) }}
                                     </a>
+
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        @foreach ($locales as $locale)
+                                            <a class="dropdown-item"
+                                                href="{{ route('change.language', $locale->value) }}">
+                                                {{ $locale->label() }}
+                                            </a>
+                                        @endforeach
+                                    </div>
 
                                     <div
                                         class="dropdown-menu dropdown-menu-right dropdown-menu-animated language-switch">

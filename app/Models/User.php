@@ -4,7 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserStatus;
-use Illuminate\Database\Eloquent\Builder;
+use App\Traits\FilterTrait;
+use App\Traits\ResponseTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,7 +13,11 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use FilterTrait, HasFactory, Notifiable, ResponseTrait;
+
+    const STATUS_ENUM = UserStatus::class;
+
+    protected array $searchable = ['name', 'email'];
 
     /**
      * The attributes that are mass assignable.
@@ -50,33 +55,31 @@ class User extends Authenticatable
         ];
     }
 
-    public function scopeSearch(Builder $query, ?string $keyword): Builder
+    /**
+     * Lấy Badge (Enum) tương ứng với trạng thái người dùng.
+     *
+     * @return string
+     */
+    public function getBadgeAttribute(): string
     {
-        if (! $keyword) {
-            return $query;
-        }
-
-        return $query->where(function (Builder $q) use ($keyword) {
-            $q->where('name', 'like', "%{$keyword}%")
-                ->orWhere('email', 'like', "%{$keyword}%");
-        });
+        return $this->status->badge();
     }
 
-    public function scopeLasted(Builder $query, string $column = 'id'): Builder
+    /**
+     *  Chuyển đổi trạng thái người dùng giữa ACTIVE và LOCKED.
+     *
+     * @return array|string|null
+     */
+    public function toggleStatus(): string
     {
-        return $query->orderByDesc($column);
-    }
+        $this->status = $this->status === UserStatus::ACTIVE
+            ? UserStatus::LOCKED
+            : UserStatus::ACTIVE;
 
-    public function scopeStatus(Builder $query, mixed $status): Builder
-    {
-        if ($status === null || $status === '') {
-            return $query;
-        }
+        $this->save();
 
-        if ($status instanceof UserStatus) {
-            $status = $status->value;
-        }
-
-        return $query->where('status', $status);
+        return $this->status === UserStatus::ACTIVE
+            ? __('users.account_unlocked')
+            : __('users.account_locked');
     }
 }

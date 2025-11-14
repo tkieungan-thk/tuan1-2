@@ -86,16 +86,13 @@
                                             <td>{{ $user->id }}</td>
                                             <td>{{ $user->name }}</td>
                                             <td>{{ $user->email }}</td>
-                                            <td>
-                                                <span class="badge badge-{{ $user->status->color() }}">
-                                                    {{ $user->status->label() }}
-                                                </span>
+                                            <td>{!! $user->badge !!}</td>
                                             <td class="d-flex justify-content-end">
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('users.edit', $user->id) }}"
                                                         class="btn btn-warning mx-1"><i class="fa fa-edit"></i></a>
                                                     <button type="button"
-                                                        class="btn btn-{{ $user->status === \App\Enums\UserStatus::ACTIVE ? 'success' : 'warning' }} mx-1"
+                                                        class="btn btn-{{ $user->status->color() }} mx-1"
                                                         data-toggle="modal" data-target="#statusModal"
                                                         data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                                                         data-status="{{ $user->status->value }}">
@@ -189,9 +186,10 @@
             const id = button.data('id');
             const name = button.data('name');
             const status = button.data('status');
+            const UserStatus = @json(array_column($statuses, 'value', 'name'));
 
             const modal = $(this);
-            const isActive = status == 1;
+            const isActive = status === UserStatus.ACTIVE;
 
             modal.find('#statusModalTitle').text(isActive ? translations.lockTitle : translations.unlockTitle);
             modal.find('#statusModalMessage').html(
@@ -239,7 +237,6 @@
                         keyword,
                         status
                     },
-                    beforeSend: function() {},
                     success: function(response) {
                         $('tbody').html($(response).find('tbody').html());
                     }

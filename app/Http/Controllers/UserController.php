@@ -2,18 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserNotificationType;
 use App\Enums\UserStatus;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
 use App\Notifications\UserNotification;
+use App\Traits\FilterTrait;
+use App\Traits\ResponseTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
+    use FilterTrait, ResponseTrait;
+
     /**
      * Hiển thị danh sách người dùng
      *
+     * @param  UserRequest  $request
      * @return View.
      */
     public function index(UserRequest $request): View
@@ -26,7 +32,7 @@ class UserController extends Controller
         $users = User::query()
             ->search($keyword)
             ->status($status)
-            ->lasted()
+            ->lasted('id')
             ->get();
         $statuses = UserStatus::cases();
 
@@ -52,28 +58,21 @@ class UserController extends Controller
     public function store(UserRequest $request): RedirectResponse
     {
         try {
-            $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'password' => $request->password,
-                'status'   => UserStatus::ACTIVE,
-            ]);
-            $user->notify(new UserNotification($request->password, 'created'));
+            $data           = $request->validated();
+            $data['status'] = UserStatus::ACTIVE;
+            $user           = User::create($data);
+            $user->notify(new UserNotification($request->password, UserNotificationType::CREATED));
 
-            return redirect()
-                ->route('users.index')
-                ->with('success', __('messages.user_created'));
+            return $this->responseSuccess(__('messages.user_created'));
         } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', __('messages.user_create_failed'));
+            return $this->responseError(__('messages.user_create_failed'));
         }
     }
 
     /**
      * Hiển thị form chỉnh sửa thông tin người dùng.
      *
-     * @param User
+     * @param User $user
      * @return View
      */
     public function edit(User $user): View
@@ -84,7 +83,7 @@ class UserController extends Controller
     /**
      * Cập nhật thông tin người dùng.
      *
-     * @param User
+     * @param User $user
      * @param UserRequest $request
      * @return RedirectResponse
      */
@@ -105,26 +104,20 @@ class UserController extends Controller
                 $user->save();
 
                 if ($passwordChanged) {
-                    $user->notify(new UserNotification($request->password, 'updated'));
+                    $user->notify(new UserNotification($request->password, UserNotificationType::UPDATED));
                 }
             }
 
-            return redirect()
-                ->route('users.index')
-                ->with('success', __('messages.user_updated'));
+            return $this->responseSuccess(__('messages.user_updated'));
         } catch (\Exception $e) {
-            report($e);
-
-            return back()
-                ->withInput()
-                ->with('error', __('messages.user_update_failed'));
+            return $this->responseError(__('messages.user_update_failed'));
         }
     }
 
     /**
      * Xử lý xóa người dùng
      *
-     * @param User
+     * @param User $user
      * @return RedirectResponse
      */
     public function destroy(User $user): RedirectResponse
@@ -132,39 +125,26 @@ class UserController extends Controller
         try {
             $user->delete();
 
-            return redirect()
-                ->route('users.index')
-                ->with('success', __('messages.user_deleted'));
+            return $this->responseSuccess(__('messages.user_deleted'));
         } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', __('messages.user_delete_failed'));
+            return $this->responseError(__('messages.user_delete_failed'));
         }
     }
 
     /*
      * Xử lý thay đổi trạng thái người dùng, khóa tài khoản
      *
-     * @param User
+     * @param User $user
      * @return RedirectResponse
      */
     public function updateStatus(User $user): RedirectResponse
     {
         try {
-            $user->status = $user->status === UserStatus::ACTIVE
-                            ? UserStatus::LOCKED
-                            : UserStatus::ACTIVE;
-            $user->save();
+            $message = $user->toggleStatus();
 
-            $message = $user->status === UserStatus::ACTIVE
-                ? __('users.account_unlocked')
-                : __('users.account_locked');
-
-            return redirect()
-                ->route('users.index')
-                ->with('success', $message);
+            return $this->responseSuccess($message);
         } catch (\Exception $e) {
-            return back()->with('error', __('users.update_status_failed'));
+            return $this->responseError(__('users.update_status_failed'));
         }
     }
 }
