@@ -1,3 +1,10 @@
+@php
+    use App\Enums\Locale;
+
+    $locales = Locale::cases();
+    $current = App::getLocale();
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,31 +36,20 @@
                             </ul>
 
                             <ul class="navbar-right ml-auto list-inline float-right mb-0">
-                                <!-- language-->
+                                <!-- language -->
                                 <li class="dropdown notification-list list-inline-item d-none d-md-inline-block">
-                                    <a class="nav-link dropdown-toggle arrow-none waves-effect" data-toggle="dropdown"
-                                        href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                                        <img src="assets/images/flags/us_flag.jpg" class="mr-2" height="12"
-                                            alt="" />
-                                        English <span class="mdi mdi-chevron-down"></span>
+                                    <a class="nav-link dropdown-toggle waves-effect" href="#"
+                                        data-toggle="dropdown">
+                                        {{ strtoupper($current) }}
                                     </a>
-                                    <div
-                                        class="dropdown-menu dropdown-menu-right dropdown-menu-animated language-switch">
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/french_flag.jpg" alt=""
-                                                height="16" /><span> French </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/spain_flag.jpg" alt=""
-                                                height="16" /><span> Spanish </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/russia_flag.jpg" alt=""
-                                                height="16" /><span> Russian </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/germany_flag.jpg" alt=""
-                                                height="16" /><span> German </span></a>
-                                        <a class="dropdown-item" href="#"><img
-                                                src="assets/images/flags/italy_flag.jpg" alt=""
-                                                height="16" /><span> Italian </span></a>
+
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        @foreach ($locales as $locale)
+                                            <a class="dropdown-item"
+                                                href="{{ route('change.language', $locale->value) }}">
+                                                {{ $locale->label() }}
+                                            </a>
+                                        @endforeach
                                     </div>
                                 </li>
 
@@ -81,12 +77,12 @@
                                             <!-- item-->
                                             <a class="dropdown-item" href="{{ route('password.edit') }}"><i
                                                     class="mdi mdi-account-circle"></i>
-                                                Profile</a>
+                                                {{ __('layout.profile') }}</a>
                                             <div class="dropdown-divider"></div>
                                             <form method="POST" action="{{ route('logout') }}">
                                                 @csrf
                                                 <button type="submit" class="dropdown-item text-danger">
-                                                    <i class="mdi mdi-power text-danger"></i> Logout
+                                                    <i class="mdi mdi-power text-danger"></i> {{ __('layout.logout') }}
                                                 </button>
                                             </form>
                                         </div>
@@ -117,14 +113,6 @@
             </header>
         </div>
         <div class="wrapper">
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert" id="alert-success">
-                    {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
             @yield('content')
         </div>
 
@@ -133,6 +121,7 @@
 
 
     @include('layouts.partials.script')
+    @yield('scripts')
 
 </body>
 

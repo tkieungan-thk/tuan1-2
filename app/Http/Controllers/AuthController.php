@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserStatus;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
@@ -11,7 +12,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -41,7 +41,23 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (! $user) {
+            return back()->withInput()
+                ->with('error', __('messages.account_not_found'));
+        }
+
+        if ($user->status === UserStatus::LOCKED) {
+            return back()->withInput()
+                ->with('error', __('messages.account_locked'));
+        }
+
+        if (Auth::attempt([
+            'email'    => $credentials['email'],
+            'password' => $credentials['password'],
+            'status'   => UserStatus::ACTIVE->value,
+        ], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
             return redirect()->intended('admin')
@@ -75,7 +91,7 @@ class AuthController extends Controller
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => $request->password,
             ]);
 
             Auth::login($user);
