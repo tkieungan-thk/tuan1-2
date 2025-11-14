@@ -122,9 +122,11 @@
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td><span class="badge badge-{{ $product->status->color() }}">
+                                            <td>
+                                                <span class="badge badge-{{ $product->status->color() }}">
                                                     {{ $product->status->label() }}
-                                                </span></td>
+                                                </span>
+                                            </td>
                                             <td class="d-flex justify-content-end">
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('products.show', $product->id) }}"

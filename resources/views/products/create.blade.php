@@ -219,44 +219,24 @@
                 imageInput.files = dataTransfer.files;
             }
 
-            // imageInput.addEventListener('change', function() {
-            //     imagePreview.innerHTML = '';
-            //     if (this.files.length > 0) {
-            //         imagePreview.classList.remove('d-none');
-            //         Array.from(this.files).forEach(file => {
-            //             const reader = new FileReader();
-            //             reader.onload = function(e) {
-            //                 const col = document.createElement('div');
-            //                 col.className = 'col-md-3 mb-2 rounded mr-2';
-            //                 col.innerHTML =
-            //                     `<img src="${e.target.result}" class="img-fluid rounded border">`;
-            //                 imagePreview.appendChild(col);
-            //             };
-            //             reader.readAsDataURL(file);
-            //         });
-            //     } else {
-            //         imagePreview.classList.add('d-none');
-            //     }
-            // });
-
             addBtn.addEventListener('click', function() {
                 const newAttr = document.createElement('div');
                 newAttr.className = 'border rounded p-3 mb-3 attribute-group';
                 newAttr.innerHTML = `
-            <div class="row">
-                <div class="col-md-6 mb-2">
-                    <label class="form-label">{{ __('products.attribute_name') }}</label>
-                    <input type="text" name="attributes[${attrCount}][name]" class="form-control">
-                </div>
-                <div class="col-md-6 mb-2">
-                    <label class="form-label">{{ __('products.attribute_values') }}</label>
-                    <input type="text" name="attributes[${attrCount}][values]" class="form-control">
-                </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-attribute mt-2">
-                <i class="fa fa-times"></i> {{ __('products.remove_attribute') }}
-            </button>
-        `;
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">{{ __('products.attribute_name') }}</label>
+                            <input type="text" name="attributes[${attrCount}][name]" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">{{ __('products.attribute_values') }}</label>
+                            <input type="text" name="attributes[${attrCount}][values]" class="form-control">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-attribute mt-2">
+                        <i class="fa fa-times"></i> {{ __('products.remove_attribute') }}
+                    </button>
+                `;
                 attributesContainer.appendChild(newAttr);
                 attrCount++;
             });

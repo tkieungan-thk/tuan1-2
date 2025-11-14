@@ -73,12 +73,12 @@ class ProductController extends Controller
 
         try {
             $product = Product::create([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
-                'price'       => $request->price,
-                'stock'       => $request->stock,
-                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
             if ($request->hasFile('images')) {
@@ -128,12 +128,12 @@ class ProductController extends Controller
 
         try {
             $product->fill([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'category_id' => $request->category_id,
                 'description' => $request->description,
-                'price'       => $request->price,
-                'stock'       => $request->stock,
-                'status'      => $request->status ?? Product::DEFAULT_STATUS->value,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => $request->status ?? Product::DEFAULT_STATUS->value,
             ]);
 
             $hasChanges = $product->isDirty();
@@ -211,7 +211,7 @@ class ProductController extends Controller
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $path,
-                    'is_main'    => $index === $mainImageIndex,
+                    'is_main' => $index === $mainImageIndex,
                 ]);
             }
         }
@@ -239,7 +239,7 @@ class ProductController extends Controller
 
             $attribute = Attribute::updateOrCreate(
                 [
-                    'id'         => $isUpdate ? ($attributeData['id'] ?? null) : null,
+                    'id' => $isUpdate ? ($attributeData['id'] ?? null) : null,
                     'product_id' => $product->id,
                 ],
                 [
@@ -253,7 +253,7 @@ class ProductController extends Controller
             $this->syncAttributeValues($attribute, $values);
         }
 
-        if ($isUpdate && ! empty($existingAttributeIds)) {
+        if ($isUpdate && !empty($existingAttributeIds)) {
             Attribute::where('product_id', $product->id)
                 ->whereNotIn('id', $existingAttributeIds)
                 ->delete();
@@ -273,10 +273,10 @@ class ProductController extends Controller
         $attribute->values()->delete();
 
         foreach ($normalizedValues as $value) {
-            if (! empty($value)) {
+            if (!empty($value)) {
                 AttributeValue::create([
                     'attribute_id' => $attribute->id,
-                    'value'        => $value,
+                    'value' => $value,
                 ]);
             }
         }
@@ -358,7 +358,7 @@ class ProductController extends Controller
      *
      * @param  Product  $product
      * @param  array<int,int>  $imageIds
-     * @return void
+     * @return bool
      */
     private function deleteProductImages(Product $product, array $imageIds): bool
     {
@@ -374,7 +374,7 @@ class ProductController extends Controller
 
         $imagePaths = $imagesToDelete->pluck('image_path')->filter()->toArray();
 
-        if (! empty($imagePaths)) {
+        if (!empty($imagePaths)) {
             Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
         }
 
@@ -403,7 +403,7 @@ class ProductController extends Controller
 
         $imagePaths = $product->images->pluck('image_path')->filter()->toArray();
 
-        if (! empty($imagePaths)) {
+        if (!empty($imagePaths)) {
             Storage::disk(Product::IMAGE_DISK)->delete($imagePaths);
         }
 
