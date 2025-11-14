@@ -51,20 +51,6 @@
                                             </a>
                                         @endforeach
                                     </div>
-
-                                    <div
-                                        class="dropdown-menu dropdown-menu-right dropdown-menu-animated language-switch">
-                                        <a class="dropdown-item" href="{{ route('change.language', 'en') }}">
-                                            <img src="{{ asset('assets/images/flags/us_flag.jpg') }}" height="16"
-                                                alt="">
-                                            <span>English</span>
-                                        </a>
-                                        <a class="dropdown-item" href="{{ route('change.language', 'vi') }}">
-                                            <img src="{{ asset('assets/images/flags/vietnam_flag.jpg') }}"
-                                                height="16" alt="">
-                                            <span>Vietnamese</span>
-                                        </a>
-                                    </div>
                                 </li>
 
                                 <!-- full screen -->

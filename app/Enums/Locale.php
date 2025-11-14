@@ -15,8 +15,8 @@ enum Locale: string
     public function label(): string
     {
         return match ($this) {
-            self::EN => 'English',
-            self::VI => 'Vietnamese',
+            self::EN => __('layout.en'),
+            self::VI => __('layout.vi'),
         };
     }
 

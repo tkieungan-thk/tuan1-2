@@ -7,4 +7,6 @@ return [
     'users'      => 'Users',
     'profile'    => 'Profile',
     'logout'     => 'Logout',
+    'en'         => 'English',
+    'vi'         => 'Vietnamese',
 ];

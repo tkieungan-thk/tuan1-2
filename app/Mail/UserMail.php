@@ -66,6 +66,7 @@ class UserMail extends Mailable
         return match ($this->type) {
             UserNotificationType::CREATED => __('emails.user_created_subject'),
             UserNotificationType::UPDATED => __('emails.user_updated_subject'),
+            default                       => __('emails.user_default_subject'),
         };
     }
 }

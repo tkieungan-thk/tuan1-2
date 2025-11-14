@@ -7,4 +7,6 @@ return [
     'users'      => 'Người dùng',
     'profile'    => 'Thông tin',
     'logout'     => 'Đăng xuất',
+    'en'         => 'Tiếng Anh',
+    'vi'         => 'Tiếng Việt',
 ];
