@@ -15,7 +15,7 @@
                     </a>
                 </li>
                 <li class="has-submenu">
-                    <a href="/employee">
+                    <a href="/users">
                         <i class="icon-accelerator"></i>
                         {{ __('layout.users') }}
                     </a>
