@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class PasswordController extends Controller
@@ -34,7 +33,7 @@ class PasswordController extends Controller
         try {
             $user = $request->user();
 
-            $user->update(['password' => Hash::make($request->password)]);
+            $user->update(['password' => $request->password]);
 
             return back()->with('success', __('passwords.updated'));
         } catch (\Throwable $e) {
