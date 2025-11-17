@@ -90,7 +90,6 @@
                             <h5 class="fw-semibold mb-3">{{ __('products.images') }}</h5>
 
                             @if ($product->images->count() > 0)
-                                <label class="form-label">Ảnh hiện tại</label>
                                 <div class="row mb-4">
                                     @foreach ($product->images as $image)
                                         <div class="col-md-3 mb-3">

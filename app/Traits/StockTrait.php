@@ -3,60 +3,54 @@
 namespace App\Traits;
 
 use App\Enums\ProductStock;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Product;
 
 trait StockTrait
 {
     /**
-     * Scope cho sản phẩm có stock
-     */
-    public function scopeInStock(Builder $query): Builder
-    {
-        return $query->where('stock', '>', 0);
-    }
-
-    /**
-     * Scope cho sản phẩm sắp hết hàng
-     */
-    public function scopeLowStock(Builder $query): Builder
-    {
-        return $query->where('stock', '>', 0)
-            ->where('stock', '<=', $this->getMinStockAlert());
-    }
-
-    /**
-     * Scope cho sản phẩm hết hàng
-     */
-    public function scopeOutOfStock(Builder $query): Builder
-    {
-        return $query->where('stock', '<=', 0);
-    }
-
-    /**
-     * Kiểm tra stock status
+     * Lấy trạng thái tồn kho
+     *
+     * @return ProductStock
      */
     public function getStockStatusAttribute(): ProductStock
     {
         return ProductStock::fromStock($this->stock);
     }
 
+    /**
+     * Kiểm tra sản phẩm còn hàng
+     *
+     * @return bool
+     */
     public function isInStock(): bool
     {
         return $this->stock > 0;
     }
 
+    /**
+     * Kiểm tra sản phẩm hết hàng
+     *
+     * @return bool
+     */
     public function isOutOfStock(): bool
     {
         return $this->stock <= 0;
     }
 
+    /**
+     * Sản phẩm còn hàng số lượng thấp
+     *
+     * @return bool
+     */
     public function isLowStock(): bool
     {
-        return $this->stock > 0 && $this->stock <= $this->getMinStockAlert();
+        return $this->stock > 0 && $this->stock <= Product::MIN_STOCK_ALERT;
     }
 
     /**
-     * Format stock information
+     * Lấy nội dung stock
+     *
+     * @return string
      */
     public function getFormattedStockAttribute(): string
     {

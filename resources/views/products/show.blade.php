@@ -94,9 +94,10 @@
 
                                 <div class="mb-4">
                                     <span class="fw-bold {{ $product->stock > 0 ? 'text-success' : 'text-danger' }}">
-                                        {{ $product->stock > 0 ? '✓ ' . __('products.stock_0') : '✗ ' . __('products.stock_0') }}
+                                        {{ $product->stock > 0 ? __('products.stock_0') : __('products.stock_0') }}
                                     </span>
-                                    <span class="text-muted ms-2">({{ $product->stock }} {{ __('products.name') }})</span>
+                                    <span class="text-muted ms-2">({{ $product->stock }}
+                                        {{ __('products.page_title') }})</span>
                                 </div>
                             </div>
                         </div>

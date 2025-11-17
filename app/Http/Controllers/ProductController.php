@@ -124,10 +124,6 @@ class ProductController extends Controller
 
             return $this->responseInfo('products.show', __('products.no_changes'), $product);
         } catch (\Throwable $e) {
-            logger()->error($e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-            ]);
-
             return $this->responseError(__('products.updated_error'));
         }
     }

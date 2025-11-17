@@ -11,6 +11,7 @@ trait ResponseTrait
      *
      * @param string $message
      * @param string $route
+     * @param $model
      * @return \Illuminate\Http\RedirectResponse
      */
     public function responseSuccess(string $route, string $message, $model = null): RedirectResponse
@@ -19,6 +20,14 @@ trait ResponseTrait
             ->with('success', $message);
     }
 
+    /**
+     * Trả về response redirect và thông tin.
+     *
+     * @param string $message
+     * @param string $route
+     * @param $model
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function responseInfo(string $route, string $message, $model = null): RedirectResponse
     {
         return redirect()->route($route, $model)

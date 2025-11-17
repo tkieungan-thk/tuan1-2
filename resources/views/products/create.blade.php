@@ -204,7 +204,7 @@
                                 <div class="border rounded overflow-hidden shadow-sm">
                                     <img src="${e.target.result}" class="img-fluid" style="height:200px;object-fit:cover;">
                                     <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
-                                        onclick="removeImage(${index})" title="Xóa ảnh">
+                                        onclick="removeImage(${index})">
                                         &times;
                                     </button>
                                 </div>

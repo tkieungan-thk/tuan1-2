@@ -9,11 +9,23 @@ use Illuminate\Support\Facades\DB;
 class ProductService
 {
     /**
-     * Create a new class instance.
+     * Khởi tạo ProductService.
+     *
+     * @param  ProductAttributeService  $attributeService
+     * @param  ProductImageService      $imageService
      */
     public function __construct(private ProductAttributeService $attributeService, private ProductImageService $imageService
     ) {}
 
+    /**
+     * Tạo sản phẩm
+     *
+     * @param array $data
+     * @param mixed $images
+     * @param mixed $mainIndex
+     * @param mixed $attributes
+     * @return Product
+     */
     public function create(array $data, $images, $mainIndex, $attributes): Product
     {
         return DB::transaction(function () use ($data, $images, $mainIndex, $attributes) {
@@ -31,6 +43,14 @@ class ProductService
         });
     }
 
+    /**
+     * Cập nhật sản phẩm
+     *
+     * @param \App\Models\Product $product
+     * @param array $data
+     * @param \App\Http\Requests\ProductRequest $request
+     * @return array
+     */
     public function update(Product $product, array $data, ProductRequest $request): array
     {
         return DB::transaction(function () use ($product, $data, $request) {
@@ -40,20 +60,8 @@ class ProductService
             if ($changed) {
                 $product->save();
             }
-
-            $imgChanged = false;
-            if ($request->hasFile('images')) {
-                $this->imageService->processProductImages($product, $request->file('images'), $request->main_image_index);
-                $imgChanged = true;
-            }
-
-            if ($request->filled('existing_main_image')) {
-                $imgChanged = $this->imageService->updateMainImage($product, $request->existing_main_image);
-            }
-
-            if ($request->filled('delete_images')) {
-                $imgChanged = $this->imageService->deleteProductImages($product, $request->delete_images);
-            }
+            
+            $imgChanged = $this->imageService->handleImageUpdates($product, $request);
 
             $attrChanged = false;
             if ($request->has('attributes')) {
@@ -68,6 +76,12 @@ class ProductService
         });
     }
 
+    /**
+     * Xóa sản phẩm + ảnh
+     *
+     * @param Product $product
+     * @return void
+     */
     public function delete(Product $product): void
     {
         DB::transaction(function () use ($product) {

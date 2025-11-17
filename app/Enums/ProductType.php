@@ -8,11 +8,21 @@ enum ProductType: string
     case INACTIVE = 'inactive';
     case DRAFT    = 'draft';
 
+    /**
+     * Lấy danh sách giá trị của enum
+     *
+     * @return array<int, string>
+     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
 
+    /**
+     * Lấy danh sách hiển thị tương ứng với giá trị enum.
+     *
+     * @return array
+     */
     public static function labels(): array
     {
         return [
@@ -22,11 +32,21 @@ enum ProductType: string
         ];
     }
 
+    /**
+     *Lấy tên hiển thị của enum hiện tại.
+     *
+     * @return string
+     */
     public function label(): string
     {
         return self::labels()[$this->value] ?? $this->value;
     }
 
+    /**
+     * Lấy màu tương ứng với giá trị enum.
+     *
+     * @return string
+     */
     public function color(): string
     {
         return match ($this) {
@@ -36,6 +56,11 @@ enum ProductType: string
         };
     }
 
+    /**
+     * Lấy icon tương ứng với giá trị enum.
+     *
+     * @return string
+     */
     public function icon(): string
     {
         return match ($this) {
@@ -43,15 +68,5 @@ enum ProductType: string
             self::INACTIVE => 'fa-times-circle',
             self::DRAFT    => 'fa-edit',
         };
-    }
-
-    public function isActive(): bool
-    {
-        return $this === self::ACTIVE;
-    }
-
-    public function isDraft(): bool
-    {
-        return $this === self::DRAFT;
     }
 }

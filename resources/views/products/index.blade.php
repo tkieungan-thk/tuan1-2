@@ -114,11 +114,11 @@
                                                     </span>
                                                 @elseif($product->isLowStock())
                                                     <span class="badge badge-warning">
-                                                        {{ $product->getFormattedStockAttribute() }}
+                                                        {{ $product->formatted_stock }}
                                                     </span>
                                                 @else
                                                     <span class="badge badge-success">
-                                                        {{ $product->getFormattedStockAttribute() }}
+                                                        {{ $product->formatted_stock }}
                                                     </span>
                                                 @endif
                                             </td>
